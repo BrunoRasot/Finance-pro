@@ -1,0 +1,19 @@
+name: finance-pro
+services:
+  db:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: finance_pro
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Run pnpm db:setup first}
+      POSTGRES_DB: finance_pro
+    ports:
+      - '127.0.0.1:5433:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U finance_pro -d finance_pro']
+      interval: 3s
+      timeout: 3s
+      retries: 20
+volumes:
+  postgres_data:

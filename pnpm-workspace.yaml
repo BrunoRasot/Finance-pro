@@ -1,0 +1,15 @@
+packages:
+  - apps/*
+  - packages/*
+
+strictPeerDependencies: true
+minimumReleaseAge: 1440
+overrides:
+  '@prisma/config>deepmerge-ts': '8.0.0'
+  'prisma>mysql2': '3.23.1'
+allowBuilds:
+  '@nestjs/core': false
+  unrs-resolver: false
+  '@parcel/watcher': false
+  '@prisma/engines': true
+  prisma: true

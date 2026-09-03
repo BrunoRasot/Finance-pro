@@ -1,0 +1,32 @@
+{
+  "name": "finance-pro",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Aplicación web y móvil para gestionar finanzas personales.",
+  "packageManager": "pnpm@11.22.0",
+  "scripts": {
+    "db:check:supabase": "pnpm --filter @finance-pro/api db:check:supabase",
+    "db:migrate:supabase": "pnpm --filter @finance-pro/api db:migrate:supabase",
+    "db:setup": "node scripts/setup-local-db.mjs",
+    "db:up": "docker compose up -d --wait db",
+    "db:stop": "docker compose stop db",
+    "db:generate": "pnpm --filter @finance-pro/api db:generate",
+    "db:migrate": "pnpm --filter @finance-pro/api db:migrate",
+    "test:integration": "pnpm --filter @finance-pro/api test:integration",
+    "dev:api": "pnpm --filter @finance-pro/api start:dev",
+    "build": "pnpm --filter @finance-pro/api build",
+    "start:api": "pnpm --filter @finance-pro/api start:prod",
+    "typecheck": "pnpm --filter @finance-pro/api typecheck",
+    "lint": "pnpm --filter @finance-pro/api lint",
+    "test": "pnpm --filter @finance-pro/api test",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "devDependencies": {
+    "prettier": "^3.6.2"
+  },
+  "engines": {
+    "node": ">=24 <25",
+    "pnpm": ">=11 <12"
+  }
+}

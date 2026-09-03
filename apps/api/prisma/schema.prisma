@@ -1,0 +1,33 @@
+generator client {
+  provider = "prisma-client"
+  output = "../src/generated/prisma"
+  moduleFormat = "cjs"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum AccountType {
+  CASH
+  BANK
+  WALLET
+}
+
+enum Currency {
+  PEN
+  USD
+}
+
+model Account {
+  id             String      @id @default(uuid()) @db.Uuid
+  ownerId        String      @map("owner_id") @db.Uuid
+  name           String      @db.VarChar(80)
+  type           AccountType
+  currency       Currency
+  openingBalance Decimal     @map("opening_balance") @db.Decimal(18, 2)
+  createdAt      DateTime    @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  @@index([ownerId, createdAt, id])
+  @@map("accounts")
+}

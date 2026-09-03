@@ -1,0 +1,23 @@
+# Dependencias y compilaciones
+node_modules/
+.next/
+.expo/
+dist/
+build/
+coverage/
+*.tsbuildinfo
+.pnpm-store/
+
+# Variables de entorno y secretos
+.env
+.env.*
+!.env.example
+!.env.*.example
+*.pem
+*.key
+apps/api/src/generated/
+
+# Archivos locales
+*.log
+.DS_Store
+Thumbs.db
