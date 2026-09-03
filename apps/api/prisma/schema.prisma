@@ -1,6 +1,6 @@
 generator client {
-  provider = "prisma-client"
-  output = "../src/generated/prisma"
+  provider     = "prisma-client"
+  output       = "../src/generated/prisma"
   moduleFormat = "cjs"
 }
 
@@ -20,14 +20,51 @@ enum Currency {
 }
 
 model Account {
-  id             String      @id @default(uuid()) @db.Uuid
-  ownerId        String      @map("owner_id") @db.Uuid
-  name           String      @db.VarChar(80)
+  id             String        @id @default(uuid()) @db.Uuid
+  ownerId        String        @map("owner_id") @db.Uuid
+  name           String        @db.VarChar(80)
   type           AccountType
   currency       Currency
-  openingBalance Decimal     @map("opening_balance") @db.Decimal(18, 2)
-  createdAt      DateTime    @default(now()) @map("created_at") @db.Timestamptz(3)
+  openingBalance Decimal       @map("opening_balance") @db.Decimal(18, 2)
+  createdAt      DateTime      @default(now()) @map("created_at") @db.Timestamptz(3)
+  transactions   Transaction[]
 
+  @@unique([id, ownerId])
   @@index([ownerId, createdAt, id])
   @@map("accounts")
+}
+
+enum TransactionType {
+  INCOME
+  EXPENSE
+}
+
+enum TransactionCategory {
+  SALARY
+  FREELANCE
+  FOOD
+  TRANSPORT
+  HOUSING
+  HEALTH
+  EDUCATION
+  ENTERTAINMENT
+  OTHER
+}
+
+model Transaction {
+  id             String              @id @default(uuid()) @db.Uuid
+  ownerId        String              @map("owner_id") @db.Uuid
+  accountId      String              @map("account_id") @db.Uuid
+  account        Account             @relation(fields: [accountId, ownerId], references: [id, ownerId], onDelete: Restrict, onUpdate: Restrict)
+  type           TransactionType
+  category       TransactionCategory
+  amount         Decimal             @db.Decimal(18, 2)
+  date           DateTime            @db.Date
+  description    String              @db.VarChar(250)
+  idempotencyKey String              @map("idempotency_key") @db.Uuid
+  createdAt      DateTime            @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  @@unique([ownerId, idempotencyKey])
+  @@index([accountId, ownerId, date, createdAt, id])
+  @@map("transactions")
 }

@@ -17,6 +17,7 @@ src/
   modules/
     health/                     # Estado mínimo del proceso
     accounts/                   # Presentación, aplicación, dominio y persistencia
+    transactions/               # Ingresos, gastos, historial y saldo calculado
   infrastructure/database/      # Conexión Prisma y ciclo de vida
   generated/prisma/             # Cliente generado; excluido de Git
 test/
@@ -51,7 +52,7 @@ Es un control de vida del proceso; no comprueba base de datos ni servicios exter
 
 `GET /api/v1/health/ready` comprueba conexión con PostgreSQL mediante `SELECT 1`: devuelve 200 o 503 sin detalles internos. No valida el esquema ni comprueba disponibilidad de Supabase.
 
-Las rutas de cuentas están documentadas en [accounts-api.md](../../docs/accounts-api.md).
+Las rutas de cuentas están documentadas en [accounts-api.md](../../docs/accounts-api.md), y el registro de ingresos/gastos, la idempotencia, los filtros y el saldo en [transactions-api.md](../../docs/transactions-api.md).
 
 Los errores tienen `statusCode`, `message`, `requestId` y `timestamp`. El identificador también se envía en `X-Request-Id`. Los fallos de servidor usan un mensaje genérico. Los registros de estos fallos contienen evento, identificador y código de estado, sin cuerpo, tokens, consulta ni stack del error.
 
@@ -59,7 +60,7 @@ Los errores tienen `statusCode`, `message`, `requestId` y `timestamp`. El identi
 
 - `AccessGuard` requiere un JWT válido en las rutas privadas. Solo las rutas de salud son públicas. Sin `SUPABASE_URL`, el acceso privado permanece bloqueado.
 - `SupabaseTokenVerifier` verifica firmas ES256/RS256 con JWKS, emisor, audiencia `authenticated`, caducidad, UUID del usuario y rol. Rechaza sesiones anónimas. No acepta claves `service_role` ni el antiguo esquema HS256. No se necesitan claves privadas para verificar firmas.
-- Cada consulta de cuentas filtra por propietario derivado del JWT; el cuerpo no puede establecer `ownerId`. La autorización está en la API. No hemos configurado RLS en PostgreSQL ni exponemos la base al navegador.
+- Las consultas de cuentas y movimientos filtran por propietario derivado del JWT; el cuerpo no puede establecer `ownerId`. Ambas tablas tienen RLS habilitado y acceso directo revocado a los roles `anon` y `authenticated`. La conexión privilegiada del backend exige mantener los filtros de propietario. La base no se expone al navegador.
 - La verificación JWT es local con claves públicas cacheadas hasta 10 minutos. Cerrar una sesión no revoca inmediatamente un token emitido; se respeta su expiración. Una necesidad de revocación inmediata requerirá verificación de sesión adicional.
 - Helmet configura encabezados de seguridad y se deshabilita `X-Powered-By`.
 - CORS usa una lista exacta sin credenciales de cookies. CORS limita acceso desde navegadores; no sustituye autenticación ni autorización.
@@ -85,4 +86,14 @@ pnpm test:integration
 
 `createdb` solo es necesario la primera vez. `.env.test` contiene la conexión local generada. En CI se proporciona `TEST_DATABASE_URL` mediante el entorno.
 
-Antes de publicar faltan el flujo de acceso del cliente, respaldos, roles PostgreSQL con privilegios mínimos, configuración TLS y operación del despliegue. El usuario de PostgreSQL creado por Docker es exclusivamente para desarrollo local. No se ha desplegado nada en la nube.
+La web ya incluye el flujo de acceso. La base de datos del proyecto usa Supabase con TLS verificado; API y web se ejecutan localmente. Antes de desplegarlas, preparar respaldos verificados, un rol PostgreSQL de privilegios mínimos, SMTP, dominio HTTPS y operación del servicio. El usuario de PostgreSQL creado por Docker es exclusivamente para desarrollo local.
+
+## Supabase
+
+1. Completar `apps/api/.env` a partir de `.env.example` con `SUPABASE_URL` y la conexión PostgreSQL `DATABASE_URL`. No versionar los valores reales.
+2. Para los comandos de migración, copiar `.env.supabase.example` a `.env.supabase` y completar la conexión directa o Session Pooler en puerto 5432. El script está limitado al proyecto Finance Pro configurado en `scripts/supabase-db.mjs`.
+3. Si se necesita el certificado CA, configurar `SUPABASE_CA_CERT` en `.env.supabase`. Para la conexión de ejecución en `.env`, incorporar `sslmode=verify-full` y `sslrootcert` con la ruta del certificado en `DATABASE_URL`; el servicio de ejecución no lee `.env.supabase`.
+4. Desde la raíz, ejecutar `pnpm db:check:supabase` y `pnpm db:migrate:supabase`. Este último aplica las migraciones pendientes a la base remota.
+5. Ejecutar `pnpm dev:api` y verificar `/api/v1/health/ready`.
+
+Las pruebas de integración siempre usan `TEST_DATABASE_URL` en una base dedicada cuyo nombre termina en `_test`; no usar la conexión de Supabase para pruebas destructivas.

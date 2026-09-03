@@ -1,0 +1,23 @@
+import type { Metadata } from 'next';
+import './globals.css';
+
+export const metadata: Metadata = {
+  title: {
+    default: 'Finance Pro — Tu dinero, con claridad',
+    template: '%s | Finance Pro',
+  },
+  description:
+    'Organiza tus cuentas personales y da el primer paso hacia unas finanzas más claras.',
+  robots: { index: false, follow: false },
+};
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <html lang="es">
+      <body>{children}</body>
+    </html>
+  );
+}

@@ -6,7 +6,7 @@ Base: `http://127.0.0.1:3001/api/v1`.
 
 Enviar `Authorization: Bearer <access_token>` con un token de usuario emitido por el proyecto Supabase configurado. No enviar la clave anónima, publishable key, service role ni refresh token en lugar del access token.
 
-La API valida firma ES256/RS256, emisor, audiencia, expiración y usuario. Las claves se consultan en `SUPABASE_URL/auth/v1/.well-known/jwks.json`. La integración real no requiere clave privada ni contraseña Supabase. Aún no existe una pantalla para registrar usuarios o iniciar sesión.
+La API valida firma ES256/RS256, emisor, audiencia, expiración y usuario. Las claves se consultan en `SUPABASE_URL/auth/v1/.well-known/jwks.json`. La integración real no requiere clave privada ni contraseña Supabase. La web incluye pantallas de registro e inicio de sesión.
 
 ## Crear cuenta
 
@@ -29,7 +29,7 @@ La API valida firma ES256/RS256, emisor, audiencia, expiración y usuario. Las c
 
 Respuesta 201: `id`, `name`, `type`, `currency`, `openingBalance` (siempre con dos decimales) y `createdAt` (UTC). La propiedad se deriva del JWT. Los nombres no son únicos y reintentar un POST exitoso crea otra cuenta; todavía no hay idempotencia para esta operación.
 
-`openingBalance` es un monto inicial registrado. No es un saldo actualizado: el módulo de movimientos vendrá después. Esta etapa no admite cuentas de deuda ni saldos iniciales negativos.
+`openingBalance` es un monto inicial registrado. El saldo actualizado se consulta en `GET /accounts/<uuid>/balance`, documentado en [movimientos](transactions-api.md). Esta etapa no admite tipos de cuenta de deuda ni saldos iniciales negativos; el saldo calculado sí puede ser negativo.
 
 ## Listar
 

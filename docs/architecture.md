@@ -47,7 +47,11 @@ El dominio no importa infraestructura. Los controladores no acceden a Prisma. Un
 
 ## Alcance entregado
 
-Arranque, políticas HTTP, salud, PostgreSQL 17 local, Prisma 7.10, migración de cuentas y autenticación JWT asimétrica. Las cuentas permiten crear, listar con paginación y consultar por identificador. El usuario proviene del token Supabase verificado y no se duplica una tabla de credenciales local. No hay todavía movimientos, edición, borrado, cálculos de saldo ni interfaz de acceso.
+Arranque, políticas HTTP, salud, PostgreSQL 17 local, Prisma 7.10, migraciones y autenticación JWT asimétrica. Las cuentas permiten crear, listar con paginación y consultar por identificador. El usuario proviene del token Supabase verificado y no se duplica una tabla de credenciales local.
+
+El módulo `transactions` sigue las capas de cuentas y añade ingresos/gastos, categorías predefinidas y filtros por fecha, tipo y categoría. Una clave única por usuario garantiza idempotencia y una clave foránea compuesta enlaza cada movimiento con la cuenta de su propietario. El saldo se agrega en SQL con precisión decimal dentro de una sola instantánea; se permiten saldos negativos. Los movimientos son inmutables en esta etapa: no se exponen edición ni borrado. Transferencias, programación y categorías personalizadas siguen pendientes. La web consume este contrato desde el servidor Next.js. Mantiene las claves de idempotencia durante reintentos y separa los filtros de historial del cálculo de saldo.
+
+La web Next.js usa Supabase SSR con PKCE y cookies HttpOnly. Proxy renueva la sesión; las páginas privadas y las acciones verifican al usuario mediante `getUser`. Las peticiones financieras salen del servidor Next.js hacia NestJS con el JWT, sin exponer tokens al código del navegador. NestJS conserva la autorización por propietario. El callback restringe destinos a cuentas o actualización de contraseña. Los valores monetarios se mantienen como cadenas y se formatean con BigInt para preservar centavos.
 
 Prisma genera código CommonJS para mantener el backend actual. `jose` se carga mediante importación dinámica ESM. Jest utiliza módulos VM para probar ese mismo flujo. No hay rutas ni claves de prueba en producción.
 

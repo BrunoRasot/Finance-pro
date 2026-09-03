@@ -14,13 +14,15 @@
     "db:migrate": "pnpm --filter @finance-pro/api db:migrate",
     "test:integration": "pnpm --filter @finance-pro/api test:integration",
     "dev:api": "pnpm --filter @finance-pro/api start:dev",
-    "build": "pnpm --filter @finance-pro/api build",
+    "build": "pnpm -r run build",
     "start:api": "pnpm --filter @finance-pro/api start:prod",
-    "typecheck": "pnpm --filter @finance-pro/api typecheck",
-    "lint": "pnpm --filter @finance-pro/api lint",
-    "test": "pnpm --filter @finance-pro/api test",
+    "typecheck": "pnpm -r run typecheck",
+    "lint": "pnpm -r run lint",
+    "test": "pnpm -r run test",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "dev:web": "pnpm --filter @finance-pro/web dev",
+    "start:web": "pnpm --filter @finance-pro/web start"
   },
   "devDependencies": {
     "prettier": "^3.6.2"

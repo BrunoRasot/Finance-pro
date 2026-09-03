@@ -2,11 +2,11 @@
 
 Aplicación personal de finanzas para web y móvil, con intención de publicarse más adelante.
 
-## Estado inicial
+## Estado actual
 
-El backend en `apps/api` incluye NestJS, PostgreSQL con Prisma, verificación JWT de Supabase y creación/consulta de cuentas con aislamiento por usuario. Web, móvil, pantallas de acceso y movimientos financieros siguen pendientes.
+El backend en `apps/api` incluye NestJS, PostgreSQL con Prisma, verificación JWT de Supabase, cuentas, ingresos/gastos, historial filtrable y saldo calculado con aislamiento por usuario. La web en `apps/web` incluye Next.js, registro, acceso, recuperación de contraseña y una vista privada para crear y listar cuentas. La web también incluye movimientos, filtros de historial y saldos actuales. La aplicación móvil sigue pendiente. Ver [contrato de movimientos](docs/transactions-api.md).
 
-## Stack previsto
+## Stack
 
 - Web: Next.js y TypeScript.
 - Móvil: React Native, Expo y TypeScript.
@@ -20,7 +20,7 @@ El backend en `apps/api` incluye NestJS, PostgreSQL con Prisma, verificación JW
 ```text
 finance-pro/
   apps/
-    web/        # Próxima aplicación Next.js
+    web/        # Aplicación Next.js
     mobile/     # Próxima aplicación Expo
     api/        # API NestJS
   packages/     # Futuros paquetes compartidos
@@ -41,7 +41,7 @@ cd C:\Users\bdbr2\finance-pro
 code .
 ```
 
-## Iniciar el backend
+## Iniciar con PostgreSQL local
 
 Desde la raíz del repositorio:
 
@@ -61,10 +61,16 @@ Consultar <http://127.0.0.1:3001/api/v1/health/live>: responde `{"status":"ok"}`
 
 ## Comandos desde la raíz
 
+Si el backend ya está configurado para Supabase, no se necesita Docker para ejecutar la aplicación. Desde la raíz, iniciar `pnpm dev:api` y `pnpm dev:web` en dos terminales. La conexión requiere internet. Para configurar una instalación nueva con Supabase, consultar [la guía del backend](apps/api/README.md#supabase).
+
+Para iniciar la web, completar `apps/web/.env.local` siguiendo [la guía web](apps/web/README.md), mantener la API ejecutándose y abrir otra terminal con `pnpm dev:web`. Visitar `http://localhost:3000`.
+
 | Comando                 | Función                                      |
 | ----------------------- | -------------------------------------------- |
 | `pnpm dev:api`          | API con recarga durante desarrollo           |
-| `pnpm build`            | Compilar el backend                          |
+| `pnpm dev:web`          | Web con recarga durante desarrollo           |
+| `pnpm build`            | Compilar API y web                           |
+| `pnpm start:web`        | Ejecutar la web compilada                    |
 | `pnpm start:api`        | Ejecutar el backend compilado                |
 | `pnpm typecheck`        | Revisar tipos, incluidas las pruebas         |
 | `pnpm lint`             | Análisis estático sin modificar archivos     |
@@ -77,10 +83,10 @@ Consultar <http://127.0.0.1:3001/api/v1/health/live>: responde `{"status":"ok"}`
 | `pnpm db:migrate`       | Aplicar migraciones pendientes               |
 | `pnpm test:integration` | Probar cuentas con PostgreSQL y JWT firmados |
 
-Ver [guía del backend](apps/api/README.md) y [decisiones de arquitectura](docs/architecture.md).
+Ver [guía del backend](apps/api/README.md), [guía de la web](apps/web/README.md), [decisiones de arquitectura](docs/architecture.md) y [registro de cambios](CHANGELOG.md).
 
 El flujo de GitHub Actions ejecutará formato, lint, tipos, pruebas y compilación al publicar el repositorio en GitHub. No despliega la aplicación.
 
 ## Próxima etapa
 
-Crear el flujo de registro/inicio de sesión en un cliente y el módulo de movimientos. La API verifica tokens, pero no incluye todavía pantallas de acceso. Nunca versionar credenciales ni archivos `.env` reales.
+El recorrido de registro, acceso, cuentas, ingresos, gastos, historial y saldo fue validado manualmente por el propietario del proyecto. El siguiente incremento propuesto es un resumen mensual con ingresos, gastos y categorías, separado por moneda; después, presupuestos y metas de ahorro. Nunca versionar credenciales ni archivos `.env` reales.

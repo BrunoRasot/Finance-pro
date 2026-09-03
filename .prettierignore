@@ -3,3 +3,6 @@ dist
 coverage
 pnpm-lock.yaml
 apps/api/src/generated/
+.next/
+*.tsbuildinfo
+apps/web/next-env.d.ts
