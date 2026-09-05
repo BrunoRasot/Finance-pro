@@ -7,8 +7,8 @@ import { requireUser } from '@/lib/auth';
 import { findAccount } from '@/lib/accounts';
 import { getBalance, getMovements } from '@/lib/transactions';
 import { formatAmount } from '@/lib/validation';
-import { Brand } from '@/components/brand';
-import { LogoutButton } from '@/components/logout-button';
+import { AppShell } from '@/components/app-shell';
+
 import { MovementForm } from '@/features/transactions/movement-form';
 import {
   categories,
@@ -49,12 +49,8 @@ export default async function AccountPage({
   const history = results[1].status === 'fulfilled' ? results[1].value : null;
   const path = `/cuentas/${accountId}`;
   return (
-    <div className="workspace">
-      <header className="workspace-header">
-        <Brand />
-        <LogoutButton />
-      </header>
-      <main className="workspace-main">
+    <AppShell>
+      <main className="workspace-main" id="main-content">
         <Link className="back-link" href="/cuentas">
           ← Mis cuentas
         </Link>
@@ -65,6 +61,12 @@ export default async function AccountPage({
             <span>.</span>
           </h1>
           <p>Cada movimiento cuenta. Aquí puedes seguir el tuyo.</p>
+          <Link
+            className="button subtle detail-create"
+            href="#nuevo-movimiento"
+          >
+            Registrar movimiento <ArrowUpRight size={16} />
+          </Link>
         </div>
         {balance ? (
           <section
@@ -221,7 +223,7 @@ export default async function AccountPage({
               </nav>
             )}
           </section>
-          <aside className="create-panel">
+          <aside className="create-panel" id="nuevo-movimiento">
             <div className="panel-heading">
               <h2>Nuevo movimiento</h2>
               <ArrowUpRight size={22} />
@@ -239,6 +241,6 @@ export default async function AccountPage({
       <footer className="workspace-footer">
         Finance Pro · Un paso a la vez.
       </footer>
-    </div>
+    </AppShell>
   );
 }

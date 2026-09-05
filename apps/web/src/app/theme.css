@@ -1,0 +1,84 @@
+/* Semantic colors shared by all current and future screens. */
+:root {
+  color-scheme: light;
+  --ink: #1c3433;
+  --muted: #637873;
+  --green: #226653;
+  --cream: #f4f6f5;
+  --line: #e2e9e5;
+  --accent: #cef297;
+  --surface: #ffffff;
+  --surface-muted: #f0f5ee;
+  --surface-glass: #fffffff5;
+  --page-glass: #f4f6f5f5;
+  --action: #226653;
+  --action-hover: #184c3e;
+  --on-strong: #ffffff;
+  --on-accent: #173e35;
+  --focus: #69a677;
+  --scrollbar: #9ab9a8;
+  --danger-bg: #fff0eb;
+  --danger-text: #8d392c;
+  --danger-border: #f3d6cc;
+  --success-bg: #edf7e4;
+  --success-border: #d4e9c7;
+  --warning-bg: #f7ede4;
+  --warning-text: #85613e;
+  --net-bg: #1f5142;
+  --story-bg: #173f35;
+  --story-glow: #396853;
+}
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --ink: #f1f3f5;
+  --muted: #b4bac4;
+  --green: #8dcbb2;
+  --cream: #111318;
+  --line: #3b414b;
+  --surface: #1c2027;
+  --surface-muted: #292e37;
+  --surface-glass: #1c2027f5;
+  --page-glass: #111318f5;
+  --action: #28654f;
+  --action-hover: #337d61;
+  --focus: #a4e3b3;
+  --scrollbar: #626b79;
+  --danger-bg: #3d2523;
+  --danger-text: #ffb9aa;
+  --danger-border: #73423b;
+  --success-bg: #233e2b;
+  --success-border: #426b49;
+  --warning-bg: #3c3125;
+  --warning-text: #e5bd90;
+  --net-bg: #303741;
+  --story-bg: #191d25;
+  --story-glow: #343e4b;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']):not([data-theme='dark']) {
+    color-scheme: dark;
+    --ink: #f1f3f5;
+    --muted: #b4bac4;
+    --green: #8dcbb2;
+    --cream: #111318;
+    --line: #3b414b;
+    --surface: #1c2027;
+    --surface-muted: #292e37;
+    --surface-glass: #1c2027f5;
+    --page-glass: #111318f5;
+    --action: #28654f;
+    --action-hover: #337d61;
+    --focus: #a4e3b3;
+    --scrollbar: #626b79;
+    --danger-bg: #3d2523;
+    --danger-text: #ffb9aa;
+    --danger-border: #73423b;
+    --success-bg: #233e2b;
+    --success-border: #426b49;
+    --warning-bg: #3c3125;
+    --warning-text: #e5bd90;
+    --net-bg: #303741;
+    --story-bg: #191d25;
+    --story-glow: #343e4b;
+  }
+}

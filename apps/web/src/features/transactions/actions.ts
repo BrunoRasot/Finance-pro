@@ -57,5 +57,6 @@ export async function createMovement(
   }
   revalidatePath(`/cuentas/${accountId}`);
   revalidatePath('/cuentas');
+  revalidatePath('/resumen');
   return { success: 'Movimiento registrado. El saldo se ha actualizado.' };
 }

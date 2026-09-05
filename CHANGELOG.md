@@ -1,5 +1,28 @@
 # Registro de cambios
 
+## En desarrollo — Apariencia global
+
+- Modos Claro, Oscuro y Sistema disponibles en navegación y autenticación.
+- Preferencia de apariencia persistente por navegador, aplicada desde el HTML del servidor.
+- Colores semánticos para paneles, tablas, formularios, navegación y estados; controles nativos adaptados mediante `color-scheme`.
+- Contrato de estilos para nuevas pantallas en `docs/themes.md`.
+
+## En desarrollo — Interfaz unificada
+
+- Navegación lateral en escritorio y navegación compacta en móvil, con sección activa y barra superior fija al desplazarse.
+- Nuevo estilo compartido para acceso, cuentas, movimientos y resumen: tipografía, tarjetas, formularios, estados vacíos y mensajes.
+- Accesos directos a creación de cuenta y registro de movimientos, más estados de carga con la navegación disponible.
+- Controles móviles de mayor tamaño, foco visible, enlace para saltar al contenido y respeto a movimiento reducido.
+- Se conservan los datos, endpoints y flujos financieros existentes.
+
+## En desarrollo — Resumen mensual
+
+- Endpoint privado `GET /reports/monthly?month=YYYY-MM`, con ingresos, gastos, resultado y categorías por moneda.
+- Pantalla `/resumen` con selector de mes, desglose visual, estados vacíos y errores de carga.
+- Agregación exacta por usuario y moneda, excluyendo saldos iniciales; usa las fechas de movimientos.
+- Pruebas de límites mensuales, años bisiestos, precisión, separación de monedas y aislamiento entre usuarios.
+- Sin migraciones adicionales. Presupuestos y metas de ahorro siguen pendientes.
+
 ## 2026-09-03 — Web autenticada y movimientos financieros
 
 ### Funcionalidad

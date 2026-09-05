@@ -1,4 +1,4 @@
 import { PageLoading } from '@/components/page-loading';
 export default function Loading() {
-  return <PageLoading label="Cargando cuenta y movimientos…" />;
+  return <PageLoading label="Preparando tu resumen mensual…" />;
 }

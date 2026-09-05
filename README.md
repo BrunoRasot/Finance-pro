@@ -89,4 +89,4 @@ El flujo de GitHub Actions ejecutará formato, lint, tipos, pruebas y compilaci�
 
 ## Próxima etapa
 
-El recorrido de registro, acceso, cuentas, ingresos, gastos, historial y saldo fue validado manualmente por el propietario del proyecto. El siguiente incremento propuesto es un resumen mensual con ingresos, gastos y categorías, separado por moneda; después, presupuestos y metas de ahorro. Nunca versionar credenciales ni archivos `.env` reales.
+El recorrido de registro, acceso, cuentas, ingresos, gastos, historial y saldo fue validado manualmente por el propietario del proyecto. Ya se incluye el [resumen mensual](docs/reports-api.md), accesible desde «Ver resumen mensual», con ingresos, gastos y categorías por moneda. Los siguientes incrementos son presupuestos y metas de ahorro. Nunca versionar credenciales ni archivos `.env` reales.

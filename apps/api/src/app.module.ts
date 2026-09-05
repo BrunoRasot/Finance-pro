@@ -8,6 +8,7 @@ import { validateEnvironment, type Environment } from './config/environment';
 import { HealthModule } from './modules/health/health.module';
 import { AccountsModule } from './modules/accounts/accounts.module';
 import { TransactionsModule } from './modules/transactions/transactions.module';
+import { ReportsModule } from './modules/reports/reports.module';
 import { TokenVerifier } from './common/security/token-verifier';
 import { SupabaseTokenVerifier } from './common/security/supabase-token-verifier';
 
@@ -31,6 +32,7 @@ import { SupabaseTokenVerifier } from './common/security/supabase-token-verifier
     HealthModule,
     AccountsModule,
     TransactionsModule,
+    ReportsModule,
   ],
   providers: [
     { provide: TokenVerifier, useClass: SupabaseTokenVerifier },

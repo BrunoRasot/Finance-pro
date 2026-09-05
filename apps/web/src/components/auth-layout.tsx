@@ -1,5 +1,6 @@
 import { ArrowUpRight, ShieldCheck, Wallet, Sparkles } from 'lucide-react';
 import { Brand } from './brand';
+import { ThemeSelect } from './theme-provider';
 
 export function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -45,6 +46,9 @@ export function AuthLayout({ children }: { children: React.ReactNode }) {
         </footer>
       </section>
       <section className="auth-panel">
+        <div className="auth-theme">
+          <ThemeSelect />
+        </div>
         <div className="mobile-brand">
           <Brand />
         </div>

@@ -1,11 +1,11 @@
 'use client';
 import { useActionState } from 'react';
-import { Plus } from 'lucide-react';
+import { Plus, Banknote, Landmark, Wallet } from 'lucide-react';
 import { createAccount } from './actions';
 export function AccountForm() {
   const [state, action, pending] = useActionState(createAccount, {});
   return (
-    <form action={action} className="auth-form">
+    <form action={action} className="auth-form new-account-form">
       <label>
         Nombre
         <input
@@ -15,23 +15,46 @@ export function AccountForm() {
           maxLength={80}
         />
       </label>
-      <div className="form-grid">
-        <label>
-          Tipo
-          <select name="type">
-            <option value="BANK">Banco</option>
-            <option value="CASH">Efectivo</option>
-            <option value="WALLET">Billetera digital</option>
-          </select>
-        </label>
-        <label>
-          Moneda
-          <select name="currency">
-            <option value="PEN">Soles (PEN)</option>
-            <option value="USD">Dólares (USD)</option>
-          </select>
-        </label>
-      </div>
+      <fieldset className="account-choice-field">
+        <legend>Tipo de cuenta</legend>
+        <div className="account-type-options">
+          {[
+            { value: 'BANK', label: 'Banco', Icon: Landmark },
+            { value: 'CASH', label: 'Efectivo', Icon: Banknote },
+            { value: 'WALLET', label: 'Billetera', Icon: Wallet },
+          ].map(({ value, label, Icon }) => (
+            <label key={value}>
+              <input
+                type="radio"
+                name="type"
+                value={value}
+                defaultChecked={value === 'BANK'}
+              />
+              <span>
+                <Icon size={19} />
+                {label}
+              </span>
+            </label>
+          ))}
+        </div>
+      </fieldset>
+      <fieldset className="account-choice-field">
+        <legend>Moneda</legend>
+        <div className="account-currency-options">
+          <label>
+            <input type="radio" name="currency" value="PEN" defaultChecked />
+            <span>
+              <strong>S/</strong> Soles <small>PEN</small>
+            </span>
+          </label>
+          <label>
+            <input type="radio" name="currency" value="USD" />
+            <span>
+              <strong>$</strong> Dólares <small>USD</small>
+            </span>
+          </label>
+        </div>
+      </fieldset>
       <label>
         Saldo inicial
         <input

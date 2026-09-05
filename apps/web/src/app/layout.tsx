@@ -1,4 +1,6 @@
 import type { Metadata } from 'next';
+import { cookies } from 'next/headers';
+import { ThemeProvider } from '@/components/theme-provider';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -10,14 +12,19 @@ export const metadata: Metadata = {
     'Organiza tus cuentas personales y da el primer paso hacia unas finanzas más claras.',
   robots: { index: false, follow: false },
 };
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const preference = (await cookies()).get('finance-pro-theme')?.value;
+  const theme =
+    preference === 'dark' || preference === 'light' ? preference : 'system';
   return (
-    <html lang="es">
-      <body>{children}</body>
+    <html lang="es" data-theme={theme}>
+      <body>
+        <ThemeProvider initialTheme={theme}>{children}</ThemeProvider>
+      </body>
     </html>
   );
 }
