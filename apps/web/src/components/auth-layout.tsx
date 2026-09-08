@@ -53,7 +53,14 @@ export function AuthLayout({ children }: { children: React.ReactNode }) {
           <Brand />
         </div>
         <div className="auth-panel-inner">{children}</div>
-        <p className="auth-bottom">Tus finanzas merecen un espacio propio.</p>
+        <div className="auth-bottom">
+          <span>Tus finanzas merecen un espacio propio.</span>
+          <nav aria-label="Información legal">
+            <a href="/privacidad">Privacidad</a>
+            <a href="/terminos">Términos</a>
+            <a href="/soporte">Soporte</a>
+          </nav>
+        </div>
       </section>
     </main>
   );

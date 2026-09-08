@@ -1,0 +1,42 @@
+name: Encrypted production backup
+
+on:
+  schedule:
+    - cron: '20 8 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  backup:
+    if: ${{ vars.PRODUCTION_BACKUP_ENABLED == 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      BACKUP_DATABASE_URL: ${{ secrets.BACKUP_DATABASE_URL }}
+      BACKUP_ENCRYPTION_KEY: ${{ secrets.BACKUP_ENCRYPTION_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: PostgreSQL 17 backup tool
+        shell: bash
+        run: |
+          mkdir -p "$RUNNER_TEMP/pgtools"
+          cp scripts/ci-postgres-tool.sh "$RUNNER_TEMP/pgtools/pg_dump"
+          chmod +x "$RUNNER_TEMP/pgtools/pg_dump"
+          echo "$RUNNER_TEMP/pgtools" >> "$GITHUB_PATH"
+      - name: Create encrypted backup
+        working-directory: apps/api
+        run: node scripts/encrypted-backup.mjs create "$RUNNER_TEMP/encrypted-backup"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: finance-pro-encrypted-backup-${{ github.run_id }}
+          path: ${{ runner.temp }}/encrypted-backup/*.enc
+          if-no-files-found: error
+          retention-days: 14

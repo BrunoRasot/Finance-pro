@@ -15,4 +15,8 @@ export const config = {
     'EXPO_PUBLIC_API_BASE_URL',
     process.env.EXPO_PUBLIC_API_BASE_URL,
   ).replace(/\/$/, ''),
+  webOrigin: (
+    process.env.EXPO_PUBLIC_WEB_ORIGIN ??
+    'https://finance-pro-web-o6ce.onrender.com'
+  ).replace(/\/$/, ''),
 };

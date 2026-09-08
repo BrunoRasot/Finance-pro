@@ -20,11 +20,12 @@ La candidata reúne las funciones de v1. Las pruebas locales comprueban web/API/
 | Compilación web y API; paquetes Android/iOS/web               | Verificado; repetir con cualquier cambio posterior                     |
 | Respaldo sintético y comparación exacta al restaurar          | Verificado, siete tablas y protección de sobrescritura                 |
 | Respaldo real de Finance Pro en Supabase y restauración local | Verificado con autorización del propietario; datos remotos sin cambios |
-| Hosting, dominio y HTTPS público                              | Pendiente de elección del propietario                                  |
+| Hosting y HTTPS público en Render + Neon                      | Desplegado y verificado; dominio propio pendiente                      |
 | SMTP y recorrido completo de correos                          | Pendiente de proveedor/configuración                                   |
-| APK/IPA firmado y prueba en teléfono                          | Pendiente de cuenta, firma y dispositivo                               |
-| Activar respaldo programado, copia externa y alertas          | Preparado; no activado en un servidor                                  |
-| Rol limitado en producción                                    | SQL preparado y probado localmente; no aplicado a Supabase             |
+| APK/IPA firmado y prueba en teléfono                          | Exportación validada; build EAS, firma y dispositivo pendientes        |
+| Activar respaldo programado, copia externa y alertas          | Workflow cifrado preparado; secretos y activación pendientes           |
+| Rol limitado en producción                                    | Aplicado en Neon y usado por la API de Render                          |
+| Privacidad, términos, soporte y eliminación de cuenta         | Implementado en web y enlazado desde web y móvil                       |
 
 No cambiar a `1.0.0` estable ni crear una etiqueta estable mientras los controles externos permanezcan pendientes. El número visible de Expo es `1.0.0`, reservado para el futuro binario; los paquetes del repositorio se identifican como `1.0.0-rc.1`.
 
@@ -38,6 +39,11 @@ No cambiar a `1.0.0` estable ni crear una etiqueta estable mientras los controle
 `pnpm test:recovery` crea datos sintéticos relacionados, respalda una instantánea, crea una base nueva con sufijo `_restore_test`, restaura, compara cada fila con SHA-256 y rechaza sobreescrituras. Elimina únicamente sus propios datos sintéticos y la base que creó; conserva los artefactos de prueba en `.release-local`, excluido de Git. No usar una base real con ese comando.
 
 ## Despliegue de web y API
+
+La web está en `https://finance-pro-web-o6ce.onrender.com` y la API en
+`https://finance-pro-api-wyv2.onrender.com/api/v1`. La base financiera está en
+Neon y Supabase conserva la autenticación. La guía operativa actual se encuentra
+en [render-neon.md](render-neon.md).
 
 La configuración es portable para un servidor Linux con Docker. No se ha contratado ni seleccionado un proveedor. No se incluyen credenciales en las imágenes.
 
@@ -80,7 +86,16 @@ node scripts/backup.mjs verify /ruta/privada/finance-pro-fecha.dump
 
 Las conexiones remotas requieren `sslmode=verify-full`. Las políticas pueden requerir que exista el grupo `finance_app` en el clúster de recuperación. La restauración descarta únicamente el esquema `public` vacío sin CASCADE y usa una transacción única. Si existen tablas, tipos o funciones, rechaza la operación. La comparación incluye los datos de seis tablas y el historial de migraciones. El corte/retorno a producción se realiza solo después de verificar la copia y conservar la base original.
 
-`daily-backup.mjs` y los archivos `deploy/finance-pro-backup.service`/`.timer` preparan un respaldo diario a las 03:00, con recuperación de ejecuciones omitidas. Antes de activarlos en Linux: instalar Node 24 y PostgreSQL 17; crear usuario `finance-pro`; instalar el proyecto en `/opt/finance-pro`; crear `/var/backups/finance-pro` con permisos exclusivos; definir `BACKUP_DATABASE_URL` y `BACKUP_DIRECTORY=/var/backups/finance-pro` en `/etc/finance-pro/backup.env`; instalar y habilitar el timer con systemd. No están instalados en esta computadora ni en un servidor.
+`encrypted-backup.mjs` crea una copia con AES-256-GCM y elimina los archivos
+temporales sin cifrar. `.github/workflows/backup.yml` prepara una ejecución diaria
+con artefactos privados de 14 días. Para activarla hay que guardar
+`BACKUP_DATABASE_URL` y una clave `BACKUP_ENCRYPTION_KEY` de al menos 32 caracteres
+en GitHub Actions, conservar esa clave también en un gestor de contraseñas y
+establecer `PRODUCTION_BACKUP_ENABLED=true`. Sin esa clave no se puede recuperar
+la copia.
+
+`daily-backup.mjs` y los archivos `deploy/finance-pro-backup.service`/`.timer`
+quedan como alternativa para un servidor Linux propio.
 
 Configurar copia cifrada fuera del servidor, retención y alerta por respaldo fallido/antiguo antes de abrir producción. No se borra automáticamente ningún respaldo. Verificar restauración periódicamente y antes de cambios de esquema.
 
@@ -106,10 +121,16 @@ Usar cuentas/datos de prueba y registrar fecha, plataforma, resultado y evidenci
 | Transferencia 12.01                             | Un débito y un crédito; no cuenta como ingreso/gasto del resumen             |
 | Pérdida de conexión durante envío y doble toque | Se confirma una sola operación al reintentar sin salir de la pantalla        |
 | Presupuesto y meta con aporte                   | Consumo y progreso correctos, sin mezclar PEN y USD                          |
-| Exportación JSON/CSV                            | Descarga privada con datos del usuario y centavos exactos                    |
+| Copia técnica / hoja de cálculo                 | Descarga privada con datos del usuario y centavos exactos                    |
+| Eliminación de cuenta                           | Borra identidad y datos del usuario sin afectar otras cuentas                |
 | Tema claro/oscuro, teclado, pantalla pequeña    | Controles utilizables y errores visibles                                     |
 
-`eas.json` define `preview` y `production`. Asociar la cuenta Expo/proyecto y configurar las tres variables `EXPO_PUBLIC_*` con HTTPS antes de ejecutar `eas build --platform android --profile preview`. Firmar iOS con la cuenta correspondiente. Instalar y completar la tabla en dispositivo real; los paquetes Hermes exportados no son un APK/IPA ni validan notificaciones del sistema, enlaces o firma.
+`eas.json` define entornos separados `preview` y `production`. Asociar la cuenta
+Expo/proyecto y configurar `EXPO_PUBLIC_API_BASE_URL`,
+`EXPO_PUBLIC_SUPABASE_URL`, `EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY` y
+`EXPO_PUBLIC_WEB_ORIGIN` antes de ejecutar el build. Los pasos y URLs para tiendas
+están en [mobile-store-release.md](mobile-store-release.md). Los paquetes Hermes
+exportados no son un APK/IPA ni validan enlaces o firma.
 
 ## Cierre y reversión
 

@@ -30,6 +30,7 @@ const environmentSchema = z
       .default('false')
       .transform((value) => value === 'true'),
     SUPABASE_URL: z.string().refine(isOrigin).optional(),
+    SUPABASE_SERVICE_ROLE_KEY: z.string().min(20).optional(),
     CORS_ORIGINS: z
       .string()
       .default('')

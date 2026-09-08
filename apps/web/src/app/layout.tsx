@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   },
   description:
     'Organiza tus cuentas personales y da el primer paso hacia unas finanzas más claras.',
-  robots: { index: false, follow: false },
+  robots: { index: true, follow: true },
 };
 export default async function RootLayout({
   children,

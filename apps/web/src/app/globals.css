@@ -1442,6 +1442,135 @@ select {
   }
 }
 
+/* Public information and account controls */
+.public-page {
+  min-height: 100dvh;
+  padding: 28px clamp(18px, 5vw, 72px);
+  color: var(--ink);
+  background: var(--cream);
+}
+.public-page > header,
+.public-page > footer,
+.public-page > article {
+  width: min(760px, 100%);
+  margin-inline: auto;
+}
+.public-page > header,
+.public-page > footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.public-page > article {
+  margin-block: 56px;
+  padding: clamp(24px, 5vw, 52px);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: var(--surface);
+}
+.public-page h1 {
+  margin: 8px 0 24px;
+  font-size: clamp(32px, 6vw, 52px);
+  line-height: 1.05;
+}
+.public-page h2 {
+  margin: 28px 0 8px;
+  font-size: 18px;
+}
+.public-page p,
+.public-page li {
+  color: var(--muted);
+  line-height: 1.75;
+}
+.public-page a,
+.legal-links a,
+.sidebar-bottom a,
+.auth-bottom a {
+  color: var(--green);
+  font-weight: 700;
+}
+.public-page > footer {
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  padding-bottom: 24px;
+  font-size: 12px;
+}
+.public-updated {
+  font-size: 12px;
+}
+.settings-page {
+  display: grid;
+  gap: 18px;
+}
+.settings-card {
+  padding: 22px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--surface);
+}
+.settings-card h2 {
+  margin: 0 0 8px;
+}
+.settings-card > p,
+.delete-account-form > p {
+  color: var(--muted);
+  line-height: 1.65;
+}
+.legal-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-top: 18px;
+}
+.danger-zone {
+  border-color: var(--danger-border);
+  background: var(--danger-bg);
+}
+.delete-account-form {
+  display: grid;
+  gap: 14px;
+  margin-top: 18px;
+}
+.delete-account-form label {
+  display: grid;
+  gap: 7px;
+  color: var(--danger-text);
+  font-size: 12px;
+}
+.delete-account-form input {
+  max-width: 360px;
+  height: 42px;
+  padding: 0 11px;
+  border: 1px solid var(--danger-border);
+  border-radius: 9px;
+  color: var(--ink);
+  background: var(--surface);
+}
+.delete-account-form > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.auth-bottom nav {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 6px;
+}
+.sidebar-bottom {
+  flex-wrap: wrap;
+}
+@media (max-width: 700px) {
+  .public-page {
+    padding: 18px 14px;
+  }
+  .public-page > article {
+    margin-block: 28px;
+    padding: 22px;
+  }
+}
+
 /* Data exports use the full workspace and keep download choices visible. */
 .exports-overview {
   width: 100%;

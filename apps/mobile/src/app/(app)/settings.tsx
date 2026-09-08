@@ -1,7 +1,14 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { router } from 'expo-router';
-import { useMemo } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { useMemo, useState } from 'react';
+import {
+  Alert,
+  Linking,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import { useAuth } from '@/features/auth/auth-provider';
 import {
   useAppTheme,
@@ -9,11 +16,14 @@ import {
 } from '@/features/theme/theme-provider';
 import { Button, Card, Heading, Screen } from '@/ui/components';
 import type { Palette } from '@/ui/theme';
+import { apiResponse } from '@/lib/api';
+import { config } from '@/lib/config';
 
 export default function SettingsScreen() {
   const { session, signOut } = useAuth();
   const { colors, preference, setPreference } = useAppTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
+  const [deleting, setDeleting] = useState(false);
   const links = [
     {
       title: 'Presupuestos',
@@ -23,11 +33,32 @@ export default function SettingsScreen() {
     },
     {
       title: 'Exportar datos',
-      copy: 'Respaldo JSON e historial CSV',
+      copy: 'Copia de seguridad y archivo para Excel',
       icon: 'download-outline' as const,
       href: '/(app)/exports' as const,
     },
   ];
+  async function deleteAccount() {
+    setDeleting(true);
+    try {
+      await apiResponse('/profile', {
+        method: 'DELETE',
+        body: JSON.stringify({ confirmation: 'ELIMINAR' }),
+      });
+      await signOut();
+      Alert.alert(
+        'Cuenta eliminada',
+        'Tus datos y tu acceso fueron eliminados.',
+      );
+    } catch (error) {
+      Alert.alert(
+        'No pudimos eliminar la cuenta',
+        error instanceof Error ? error.message : 'Inténtalo nuevamente.',
+      );
+    } finally {
+      setDeleting(false);
+    }
+  }
   return (
     <Screen>
       <Heading
@@ -92,6 +123,50 @@ export default function SettingsScreen() {
           <Ionicons name="chevron-forward" size={19} color={colors.muted} />
         </Pressable>
       ))}
+      <Text style={styles.section}>PRIVACIDAD Y SOPORTE</Text>
+      {[
+        ['Política de privacidad', '/privacidad'],
+        ['Términos de uso', '/terminos'],
+        ['Ayuda y soporte', '/soporte'],
+      ].map(([title, path]) => (
+        <Pressable
+          key={path}
+          onPress={() => void Linking.openURL(`${config.webOrigin}${path}`)}
+          style={styles.link}
+        >
+          <View style={styles.linkIcon}>
+            <Ionicons name="open-outline" size={21} color={colors.primary} />
+          </View>
+          <Text style={styles.linkTitle}>{title}</Text>
+          <Ionicons name="chevron-forward" size={19} color={colors.muted} />
+        </Pressable>
+      ))}
+      <Card style={{ gap: 10 }}>
+        <Text style={styles.dangerTitle}>Eliminar cuenta y datos</Text>
+        <Text style={styles.meta}>
+          Esta acción elimina permanentemente tu acceso y toda tu información
+          financiera.
+        </Text>
+        <Button
+          title="Eliminar mi cuenta"
+          variant="danger"
+          loading={deleting}
+          onPress={() =>
+            Alert.alert(
+              '¿Eliminar definitivamente?',
+              'No podrás recuperar tus cuentas, movimientos, presupuestos ni metas.',
+              [
+                { text: 'Cancelar', style: 'cancel' },
+                {
+                  text: 'Eliminar definitivamente',
+                  style: 'destructive',
+                  onPress: () => void deleteAccount(),
+                },
+              ],
+            )
+          }
+        />
+      </Card>
       <Button
         title="Cerrar sesión"
         onPress={() => {
@@ -157,4 +232,5 @@ const makeStyles = (colors: Palette) =>
       justifyContent: 'center',
     },
     linkTitle: { color: colors.ink, fontWeight: '800', fontSize: 14 },
+    dangerTitle: { color: colors.danger, fontWeight: '800', fontSize: 14 },
   });

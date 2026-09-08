@@ -46,13 +46,13 @@ export default function ExportsScreen() {
           <View style={{ flex: 1 }}>
             <Text style={styles.title}>Respaldo completo</Text>
             <Text style={styles.copy}>
-              Cuentas, movimientos, transferencias, presupuestos y metas en
-              JSON.
+              Conserva tus cuentas, movimientos, presupuestos y metas en un
+              archivo técnico de respaldo.
             </Text>
           </View>
         </View>
         <Button
-          title="Descargar JSON"
+          title="Descargar copia de seguridad"
           onPress={() => void run('json')}
           loading={busy === 'json'}
         />
@@ -72,7 +72,7 @@ export default function ExportsScreen() {
           </View>
         </View>
         <Button
-          title="Descargar CSV"
+          title="Abrir movimientos en Excel"
           onPress={() => void run('csv')}
           loading={busy === 'csv'}
         />

@@ -40,7 +40,7 @@ export default async function ExportPage() {
               <div className="export-copy">
                 <div>
                   <h3>Respaldo completo</h3>
-                  <span className="currency-tag">JSON</span>
+                  <span className="currency-tag">COPIA TÉCNICA</span>
                 </div>
                 <p>
                   Cuentas, movimientos, transferencias, presupuestos, metas y
@@ -55,7 +55,7 @@ export default async function ExportPage() {
                 href="/descargas/json"
                 prefetch={false}
               >
-                <Download size={17} /> Descargar JSON
+                <Download size={17} /> Descargar copia de seguridad
               </Link>
             </article>
 
@@ -66,7 +66,7 @@ export default async function ExportPage() {
               <div className="export-copy">
                 <div>
                   <h3>Historial de movimientos</h3>
-                  <span className="currency-tag">CSV</span>
+                  <span className="currency-tag">EXCEL Y HOJAS DE CÁLCULO</span>
                 </div>
                 <p>
                   Todos tus ingresos y gastos con fecha, cuenta, moneda,
@@ -81,7 +81,7 @@ export default async function ExportPage() {
                 href="/descargas/csv"
                 prefetch={false}
               >
-                <Download size={17} /> Descargar CSV
+                <Download size={17} /> Abrir movimientos en Excel
               </Link>
             </article>
           </section>

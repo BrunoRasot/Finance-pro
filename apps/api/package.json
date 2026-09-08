@@ -5,6 +5,7 @@
   "scripts": {
     "test:recovery": "node scripts/recovery-drill.mjs",
     "db:backup:supabase": "node scripts/supabase-db.mjs backup",
+    "db:backup:encrypted": "node scripts/encrypted-backup.mjs create ../../backups/encrypted",
     "dev": "prisma generate && nest start --watch --path tsconfig.dev.json --no-shell",
     "db:check:supabase": "node scripts/supabase-db.mjs check",
     "db:migrate:supabase": "node scripts/supabase-db.mjs migrate",

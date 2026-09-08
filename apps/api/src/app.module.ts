@@ -15,6 +15,7 @@ import { GoalsModule } from './modules/goals/goals.module';
 import { ExportsModule } from './modules/exports/exports.module';
 import { TokenVerifier } from './common/security/token-verifier';
 import { SupabaseTokenVerifier } from './common/security/supabase-token-verifier';
+import { ProfileModule } from './modules/profile/profile.module';
 
 @Module({
   imports: [
@@ -41,6 +42,7 @@ import { SupabaseTokenVerifier } from './common/security/supabase-token-verifier
     BudgetsModule,
     GoalsModule,
     ExportsModule,
+    ProfileModule,
   ],
   providers: [
     { provide: TokenVerifier, useClass: SupabaseTokenVerifier },

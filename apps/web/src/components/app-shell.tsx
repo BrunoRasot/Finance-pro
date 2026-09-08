@@ -8,6 +8,7 @@ import {
   CircleHelp,
   Download,
   Gauge,
+  Settings,
   Target,
   LayoutGrid,
   LockKeyhole,
@@ -23,6 +24,7 @@ const links = [
   { href: '/presupuestos', label: 'Presupuestos', icon: Gauge },
   { href: '/metas', label: 'Metas de ahorro', icon: Target },
   { href: '/exportar', label: 'Exportar datos', icon: Download },
+  { href: '/configuracion', label: 'Configuración', icon: Settings },
 ];
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -37,9 +39,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           ? 'Metas de ahorro'
           : pathname.startsWith('/exportar')
             ? 'Exportar datos'
-            : detail
-              ? 'Movimientos'
-              : 'Mis cuentas';
+            : pathname.startsWith('/configuracion')
+              ? 'Configuración'
+              : detail
+                ? 'Movimientos'
+                : 'Mis cuentas';
   return (
     <div
       className={`workspace app-shell${pathname === '/cuentas' ? ' accounts-shell' : pathname === '/resumen' ? ' summary-shell' : pathname === '/exportar' ? ' exports-shell' : detail ? ' detail-shell' : ''}`}
@@ -94,7 +98,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </div>
         <div className="sidebar-bottom">
           <LockKeyhole size={14} />
-          <span>Tu espacio personal</span>
+          <Link href="/privacidad">Privacidad</Link>
+          <span>·</span>
+          <Link href="/terminos">Términos</Link>
         </div>
       </aside>
       <div className="app-body">
