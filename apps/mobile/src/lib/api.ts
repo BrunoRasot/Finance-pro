@@ -52,7 +52,10 @@ export async function apiResponse(
     if (error instanceof ApiError) throw error;
     if (error instanceof Error && error.name === 'AbortError')
       throw new ApiError(408, 'La conexión tardó demasiado.');
-    throw new ApiError(0, 'No se pudo conectar con Finance Pro.');
+    throw new ApiError(
+      0,
+      'No pudimos actualizar tus datos. Revisa tu conexión e inténtalo nuevamente.',
+    );
   } finally {
     clearTimeout(timeout);
   }

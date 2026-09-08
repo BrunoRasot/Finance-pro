@@ -38,7 +38,10 @@ export async function createGoal(
     if (!response.ok) return { error: 'No pudimos crear la meta.' };
   } catch (error) {
     unstable_rethrow(error);
-    return { error: 'No pudimos conectar con el servidor.' };
+    return {
+      error:
+        'No pudimos guardar la meta. Revisa tu conexión e inténtalo nuevamente.',
+    };
   }
   refresh();
   return { success: 'Meta creada.' };

@@ -19,12 +19,12 @@ function recoveryError(error: { code?: string; status?: number }): FormState {
   if (error.code === 'email_address_not_authorized')
     return {
       error:
-        'El servicio de correo de prueba solo permite destinatarios del equipo de Supabase. Configura SMTP propio para enviar a cualquier usuario.',
+        'Por el momento no podemos enviar el enlace a este correo. Inténtalo más tarde.',
     };
   if (error.code === 'over_email_send_rate_limit' || error.status === 429)
     return {
       error:
-        'Se alcanzó el límite temporal de correos. Espera una hora o configura SMTP propio.',
+        'Se alcanzó el límite temporal de correos. Espera una hora antes de intentarlo nuevamente.',
     };
   return { error: 'No pudimos enviar el enlace. Inténtalo más tarde.' };
 }

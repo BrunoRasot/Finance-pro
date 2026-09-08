@@ -30,7 +30,10 @@ export async function createAccount(
       };
   } catch (error) {
     unstable_rethrow(error);
-    return { error: 'No pudimos conectar con el backend. Inténtalo de nuevo.' };
+    return {
+      error:
+        'No pudimos guardar la cuenta. Revisa tu conexión e inténtalo nuevamente.',
+    };
   }
   revalidatePath('/cuentas');
   return { success: 'Cuenta creada correctamente.' };

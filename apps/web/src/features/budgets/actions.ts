@@ -27,7 +27,10 @@ export async function saveBudget(
     if (!response.ok) return { error: 'No pudimos guardar el presupuesto.' };
   } catch (error) {
     unstable_rethrow(error);
-    return { error: 'No pudimos conectar con el servidor.' };
+    return {
+      error:
+        'No pudimos guardar el presupuesto. Revisa tu conexión e inténtalo nuevamente.',
+    };
   }
   revalidatePath('/presupuestos');
   return { success: 'Presupuesto guardado.' };

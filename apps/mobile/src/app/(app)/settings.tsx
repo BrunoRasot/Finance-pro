@@ -73,7 +73,7 @@ export default function SettingsScreen() {
           </View>
           <View style={{ flex: 1 }}>
             <Text style={styles.email}>{session?.user.email}</Text>
-            <Text style={styles.meta}>Sesión protegida por Supabase</Text>
+            <Text style={styles.meta}>Sesión segura y protegida</Text>
           </View>
         </View>
       </Card>

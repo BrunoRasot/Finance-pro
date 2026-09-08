@@ -60,7 +60,7 @@ export default function LoginScreen() {
     setLoading(false);
     const recoveryMessage =
       recoveryError?.code === 'email_address_not_authorized'
-        ? 'El correo de prueba solo permite destinatarios del equipo de Supabase. Necesitas SMTP propio para otros usuarios.'
+        ? 'Por el momento no podemos enviar el enlace a este correo. Inténtalo más tarde.'
         : recoveryError?.code === 'over_email_send_rate_limit' ||
             recoveryError?.status === 429
           ? 'Se alcanzó el límite temporal de correos. Espera una hora antes de intentarlo nuevamente.'
@@ -203,8 +203,8 @@ export default function LoginScreen() {
           </View>
         </View>
         <Text style={local.security}>
-          <Ionicons name="lock-closed-outline" size={11} /> Acceso protegido por
-          Supabase
+          <Ionicons name="lock-closed-outline" size={11} /> Acceso seguro y
+          protegido
         </Text>
       </Screen>
     </KeyboardAvoidingView>

@@ -86,8 +86,8 @@ export default async function AccountsPage({
                 <div className="empty-state">
                   <h2>No pudimos cargar tus cuentas</h2>
                   <p>
-                    Comprueba que el backend esté disponible e inténtalo de
-                    nuevo.
+                    No pudimos actualizar la información. Espera un momento y
+                    vuelve a intentarlo.
                   </p>
                   <Link className="button subtle" href="/cuentas">
                     Volver a intentar

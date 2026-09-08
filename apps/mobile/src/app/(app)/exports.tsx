@@ -84,7 +84,7 @@ export default function ExportsScreen() {
           color={colors.primary}
         />
         <Text style={styles.copy}>
-          La API verifica tu sesión y solo incluye tus propios datos.
+          Tu sesión protege la descarga y solo incluye tus propios datos.
         </Text>
       </View>
     </Screen>
