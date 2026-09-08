@@ -1,1 +1,5 @@
 * text=auto eol=lf
+# Unified diffs contain significant space-only context lines.
+patches/*.patch -whitespace
+# Preserve already-applied migration bytes, including final blank lines.
+apps/api/prisma/migrations/**/migration.sql whitespace=-blank-at-eof

@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { notFound } from 'next/navigation';
 import { accountsRequest } from './accounts';
 import {
-  categorySchema,
+  historyCategorySchema,
   dateSchema,
   type Filters,
 } from '@/features/transactions/model';
@@ -20,11 +20,13 @@ const movementSchema = z.object({
   id: z.uuid(),
   accountId: z.uuid(),
   type: z.enum(['INCOME', 'EXPENSE']),
-  category: categorySchema,
+  category: historyCategorySchema,
   amount: z.string().regex(/^\d+\.\d{2}$/),
   date: dateSchema,
   description: z.string(),
+  idempotencyKey: z.uuid(),
   createdAt: z.string(),
+  transferId: z.uuid().nullable(),
 });
 export type Movement = z.infer<typeof movementSchema>;
 export async function getBalance(accountId: string) {

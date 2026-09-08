@@ -13,6 +13,7 @@ export class PrismaReportRepository extends ReportRepository {
       SELECT a.currency, t.type, t.category, SUM(t.amount)::text AS total, COUNT(*)::text AS count
       FROM accounts a JOIN transactions t ON t.account_id = a.id AND t.owner_id = a.owner_id
       WHERE a.owner_id = ${ownerId}::uuid AND t.owner_id = ${ownerId}::uuid
+        AND t.transfer_id IS NULL
         AND t.date >= ${start}::date AND t.date < (${start}::date + INTERVAL '1 month')
       GROUP BY a.currency, t.type, t.category
       ORDER BY a.currency, t.type, SUM(t.amount) DESC, t.category`;

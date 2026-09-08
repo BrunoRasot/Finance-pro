@@ -15,6 +15,20 @@ const unavailable = {
   error: 'No pudimos conectar. Inténtalo de nuevo en un momento.',
 };
 
+function recoveryError(error: { code?: string; status?: number }): FormState {
+  if (error.code === 'email_address_not_authorized')
+    return {
+      error:
+        'El servicio de correo de prueba solo permite destinatarios del equipo de Supabase. Configura SMTP propio para enviar a cualquier usuario.',
+    };
+  if (error.code === 'over_email_send_rate_limit' || error.status === 429)
+    return {
+      error:
+        'Se alcanzó el límite temporal de correos. Espera una hora o configura SMTP propio.',
+    };
+  return { error: 'No pudimos enviar el enlace. Inténtalo más tarde.' };
+}
+
 export async function login(
   _state: FormState,
   form: FormData,
@@ -93,10 +107,7 @@ export async function recover(
     const { error } = await client.auth.resetPasswordForEmail(email.data, {
       redirectTo: `${getConfig().APP_ORIGIN}/auth/callback?next=/actualizar-contrasena`,
     });
-    if (error)
-      return {
-        error: 'No pudimos procesar la solicitud. Inténtalo más tarde.',
-      };
+    if (error) return recoveryError(error);
   } catch {
     return unavailable;
   }

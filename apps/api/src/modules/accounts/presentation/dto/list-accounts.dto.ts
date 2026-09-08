@@ -1,7 +1,10 @@
 import { Type } from 'class-transformer';
-import { IsInt, Max, Min } from 'class-validator';
+import { IsIn, IsInt, Max, Min } from 'class-validator';
 
 export class ListAccountsDto {
+  @IsIn(['ACTIVE', 'ARCHIVED'])
+  status: 'ACTIVE' | 'ARCHIVED' = 'ACTIVE';
+
   @Type(() => Number)
   @IsInt()
   @Min(1)

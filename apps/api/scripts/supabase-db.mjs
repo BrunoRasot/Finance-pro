@@ -5,8 +5,8 @@ import { parse } from 'dotenv';
 import pg from 'pg';
 
 const action = process.argv[2];
-if (!['check', 'migrate'].includes(action)) {
-  throw new Error('Expected check or migrate');
+if (!['check', 'migrate', 'backup'].includes(action)) {
+  throw new Error('Expected check, migrate or backup');
 }
 
 async function main() {
@@ -75,6 +75,21 @@ async function main() {
       throw new Error(
         'Migration failed. Review Prisma output before retrying.',
       );
+  }
+  if (action === 'backup') {
+    const filename =
+      process.argv[3] ??
+      `../../backups/supabase-${new Date().toISOString().replaceAll(':', '-')}.dump`;
+    const result = spawnSync(
+      process.execPath,
+      ['scripts/backup.mjs', 'create', filename],
+      {
+        env: { ...process.env, BACKUP_DATABASE_URL: connectionString },
+        stdio: 'inherit',
+        windowsHide: true,
+      },
+    );
+    if (result.status !== 0) throw new Error('Supabase backup failed.');
   }
 }
 

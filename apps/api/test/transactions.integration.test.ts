@@ -102,6 +102,20 @@ describe('Transactions with PostgreSQL and verified JWTs', () => {
     request(server)
       .get(`/api/v1/accounts/${account}/${suffix}`)
       .auth(token, { type: 'bearer' });
+  const patch = (
+    transactionId: string,
+    body: object,
+    token = tokenA,
+    account = accountId,
+  ) =>
+    request(server)
+      .patch(`/api/v1/accounts/${account}/transactions/${transactionId}`)
+      .auth(token, { type: 'bearer' })
+      .send(body);
+  const remove = (transactionId: string, token = tokenA, account = accountId) =>
+    request(server)
+      .delete(`/api/v1/accounts/${account}/transactions/${transactionId}`)
+      .auth(token, { type: 'bearer' });
 
   it('requires authentication for every movement endpoint', async () => {
     await request(server)
@@ -113,6 +127,13 @@ describe('Transactions with PostgreSQL and verified JWTs', () => {
       .expect(401);
     await request(server)
       .get(`/api/v1/accounts/${accountId}/balance`)
+      .expect(401);
+    await request(server)
+      .patch(`/api/v1/accounts/${accountId}/transactions/${randomUUID()}`)
+      .send(input())
+      .expect(401);
+    await request(server)
+      .delete(`/api/v1/accounts/${accountId}/transactions/${randomUUID()}`)
       .expect(401);
   });
   it('returns the opening balance before any movements', async () => {
@@ -302,5 +323,148 @@ describe('Transactions with PostgreSQL and verified JWTs', () => {
       { enabled: boolean }[]
     >`SELECT relrowsecurity AS enabled FROM pg_class WHERE oid = 'public.transactions'::regclass`;
     expect(rows).toEqual([{ enabled: true }]);
+  });
+
+  it('updates an owned movement and immediately recalculates the balance', async () => {
+    const maintenanceAccount = await database.client.account.create({
+      data: {
+        ownerId: userA,
+        name: 'Cuenta para edición',
+        type: 'CASH',
+        currency: 'PEN',
+        openingBalance: '100.00',
+      },
+    });
+    const created = await post(
+      input({
+        type: 'EXPENSE',
+        category: 'FOOD',
+        amount: '10.00',
+        description: 'Antes',
+      }),
+      tokenA,
+      maintenanceAccount.id,
+    ).expect(201);
+    const createdId = (created.body as { id: string }).id;
+    const response = await patch(
+      createdId,
+      {
+        type: 'INCOME',
+        category: 'FREELANCE',
+        amount: '25.50',
+        date: '2026-09-04',
+        description: ' Después ',
+      },
+      tokenA,
+      maintenanceAccount.id,
+    ).expect(200);
+    expect(response.body as object).toMatchObject({
+      id: createdId,
+      type: 'INCOME',
+      category: 'FREELANCE',
+      amount: '25.50',
+      date: '2026-09-04',
+      description: 'Después',
+    });
+    expect(response.headers['cache-control']).toBe('no-store');
+    const balance = await get('balance', tokenA, maintenanceAccount.id).expect(
+      200,
+    );
+    expect(balance.body).toMatchObject({
+      openingBalance: '100.00',
+      totalIncome: '25.50',
+      totalExpense: '0.00',
+      balance: '125.50',
+    });
+  });
+
+  it('rejects invalid, foreign and missing movement updates', async () => {
+    const created = await post(input()).expect(201);
+    const createdId = (created.body as { id: string }).id;
+    const valid = {
+      type: 'INCOME',
+      category: 'SALARY',
+      amount: '1.00',
+      date: '2026-09-05',
+      description: '',
+    };
+    await patch(createdId, { ...valid, category: 'FOOD' }).expect(400);
+    await patch(createdId, { ...valid, ownerId: userA }).expect(400);
+    await patch(createdId, valid, tokenB).expect(404);
+    await patch(randomUUID(), valid).expect(404);
+    await patch('invalid', valid).expect(400);
+  });
+
+  it('deletes only owned movements and recalculates the balance', async () => {
+    const maintenanceAccount = await database.client.account.create({
+      data: {
+        ownerId: userA,
+        name: 'Cuenta para eliminación',
+        type: 'CASH',
+        currency: 'PEN',
+        openingBalance: '20.00',
+      },
+    });
+    const created = await post(
+      input({ type: 'EXPENSE', category: 'OTHER', amount: '7.25' }),
+      tokenA,
+      maintenanceAccount.id,
+    ).expect(201);
+    const createdId = (created.body as { id: string }).id;
+    await remove(createdId, tokenB, maintenanceAccount.id).expect(404);
+    await remove(randomUUID(), tokenA, maintenanceAccount.id).expect(404);
+    expect(
+      (await get('balance', tokenA, maintenanceAccount.id).expect(200)).body,
+    ).toMatchObject({ totalExpense: '7.25', balance: '12.75' });
+    const response = await remove(
+      createdId,
+      tokenA,
+      maintenanceAccount.id,
+    ).expect(200);
+    expect(response.body as object).toEqual({ deleted: true });
+    expect(response.headers['cache-control']).toBe('no-store');
+    await remove(createdId, tokenA, maintenanceAccount.id).expect(404);
+    expect(
+      (await get('balance', tokenA, maintenanceAccount.id).expect(200)).body,
+    ).toMatchObject({ totalExpense: '0.00', balance: '20.00' });
+    expect(
+      (
+        (
+          await get(
+            'transactions?limit=100',
+            tokenA,
+            maintenanceAccount.id,
+          ).expect(200)
+        ).body as {
+          items: unknown[];
+        }
+      ).items,
+    ).not.toEqual(
+      expect.arrayContaining([expect.objectContaining({ id: createdId })]),
+    );
+  });
+
+  it('keeps movement data while an account is archived and blocks new activity', async () => {
+    const before = await database.client.transaction.count({
+      where: { ownerId: userA, accountId },
+    });
+    expect(before).toBeGreaterThan(0);
+    await request(server)
+      .post(`/api/v1/accounts/${accountId}/archive`)
+      .auth(tokenA, { type: 'bearer' })
+      .expect(201);
+    await post(input()).expect(404);
+    await get('transactions').expect(404);
+    await get('balance').expect(404);
+    expect(
+      await database.client.transaction.count({
+        where: { ownerId: userA, accountId },
+      }),
+    ).toBe(before);
+    await request(server)
+      .post(`/api/v1/accounts/${accountId}/restore`)
+      .auth(tokenA, { type: 'bearer' })
+      .expect(201);
+    await get('balance').expect(200);
   });
 });

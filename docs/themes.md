@@ -30,3 +30,7 @@ Utilizar variables semánticas en lugar de colores fijos:
 Para añadir un token, definirlo en el tema claro y en las dos declaraciones oscuras (explícita y Sistema). Los fondos decorativos oscuros de marca conservan su propia combinación de texto claro. No usar filtros de inversión de color.
 
 Revisar cada pantalla en claro, oscuro y móvil. Verificar contraste de textos, foco, estados de carga/error, controles nativos y ausencia de desbordamiento. Cambiar de tema no debe reiniciar formularios ni modificar datos financieros.
+
+Las nuevas pantallas de trabajo deben ocupar el ancho disponible dentro de `AppShell`, alinear el contenido al inicio y aprovechar la altura visible. Evitar contenedores angostos centrados cuando la tarea principal se beneficia de columnas, tablas o paneles. Reservar los anchos limitados para formularios breves, lectura o autenticación. En resoluciones menores, convertir las columnas en una sola sin provocar desplazamiento horizontal.
+
+Cada acción principal debe tener un único acceso visible por contexto. La navegación lateral o móvil concentra los cambios de sección; no repetir esos enlaces en el encabezado, el pie o tarjetas decorativas. Conservar enlaces contextuales solo cuando cambian el estado de la vista, regresan en una jerarquía o ayudan a recuperar un estado vacío.

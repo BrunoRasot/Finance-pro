@@ -9,6 +9,10 @@ import { HealthModule } from './modules/health/health.module';
 import { AccountsModule } from './modules/accounts/accounts.module';
 import { TransactionsModule } from './modules/transactions/transactions.module';
 import { ReportsModule } from './modules/reports/reports.module';
+import { TransfersModule } from './modules/transfers/transfers.module';
+import { BudgetsModule } from './modules/budgets/budgets.module';
+import { GoalsModule } from './modules/goals/goals.module';
+import { ExportsModule } from './modules/exports/exports.module';
 import { TokenVerifier } from './common/security/token-verifier';
 import { SupabaseTokenVerifier } from './common/security/supabase-token-verifier';
 
@@ -33,6 +37,10 @@ import { SupabaseTokenVerifier } from './common/security/supabase-token-verifier
     AccountsModule,
     TransactionsModule,
     ReportsModule,
+    TransfersModule,
+    BudgetsModule,
+    GoalsModule,
+    ExportsModule,
   ],
   providers: [
     { provide: TokenVerifier, useClass: SupabaseTokenVerifier },

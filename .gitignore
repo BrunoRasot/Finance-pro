@@ -3,6 +3,8 @@ node_modules/
 .next/
 .expo/
 dist/
+dist-dev/
+dist-native/
 build/
 coverage/
 *.tsbuildinfo
@@ -19,6 +21,8 @@ apps/api/src/generated/
 
 # Archivos locales
 *.log
+.release-local/
+backups/
 .DS_Store
 Thumbs.db
 

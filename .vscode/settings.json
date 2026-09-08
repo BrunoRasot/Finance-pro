@@ -8,5 +8,6 @@
   "typescript.enablePromptUseWorkspaceTsdk": true,
   "files.exclude": {
     "**/node_modules": true
-  }
+  },
+  "postman.settings.dotenv-detection-notification-visibility": false
 }

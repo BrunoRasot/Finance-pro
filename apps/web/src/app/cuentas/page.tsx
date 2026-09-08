@@ -4,9 +4,9 @@ import {
   Wallet,
   Landmark,
   Banknote,
-  ArrowUpRight,
-  ChartNoAxesCombined,
   Info,
+  Archive,
+  ArrowUpRight,
 } from 'lucide-react';
 import { requireUser } from '@/lib/auth';
 import { listAccounts, type Account } from '@/lib/accounts';
@@ -15,28 +15,32 @@ import { getBalance } from '@/lib/transactions';
 import { AppShell } from '@/components/app-shell';
 
 import { AccountForm } from '@/features/accounts/account-form';
+import { AccountActions } from '@/features/accounts/account-actions';
 const types = { BANK: 'Banco', CASH: 'Efectivo', WALLET: 'Billetera digital' };
 export default async function AccountsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ page?: string }>;
+  searchParams: Promise<{ page?: string; view?: string }>;
 }) {
   const { user } = await requireUser();
   const query = await searchParams;
+  const archived = query.view === 'archived';
   const page = /^\d{1,5}$/.test(query.page ?? '')
     ? Math.min(834, Math.max(1, Number(query.page)))
     : 1;
   let items: Account[] = [];
   let failed = false;
   try {
-    items = (await listAccounts((page - 1) * 12)).items;
+    items = (
+      await listAccounts((page - 1) * 12, archived ? 'ARCHIVED' : 'ACTIVE')
+    ).items;
   } catch (error) {
     unstable_rethrow(error);
     failed = true;
   }
-  const balanceResults = await Promise.allSettled(
-    items.map((account) => getBalance(account.id)),
-  );
+  const balanceResults = archived
+    ? []
+    : await Promise.allSettled(items.map((account) => getBalance(account.id)));
   for (const result of balanceResults)
     if (result.status === 'rejected') unstable_rethrow(result.reason);
   return (
@@ -51,13 +55,24 @@ export default async function AccountsPage({
             <p>Un lugar para cada cuenta. Una mirada más clara a tu dinero.</p>
             <span className="user-email">{user.email}</span>
           </div>
+          <nav className="account-view-switch" aria-label="Estado de cuentas">
+            <Link href="/cuentas" aria-current={!archived ? 'page' : undefined}>
+              Activas
+            </Link>
+            <Link
+              href="/cuentas?view=archived"
+              aria-current={archived ? 'page' : undefined}
+            >
+              <Archive size={14} /> Archivadas
+            </Link>
+          </nav>
         </div>
         <div className="accounts-layout">
           <section className="accounts-list-panel" aria-label="Tus cuentas">
             <div className="accounts-section-heading">
               <div>
                 <span className="eyebrow">TU DINERO ORGANIZADO</span>
-                <h2>Tus cuentas</h2>
+                <h2>{archived ? 'Cuentas archivadas' : 'Tus cuentas'}</h2>
               </div>
               <span className="accounts-page-label">Página {page}</span>
             </div>
@@ -85,12 +100,16 @@ export default async function AccountsPage({
                   </span>
                   <h2>
                     {page === 1
-                      ? 'Tu primera cuenta, tu primer paso'
+                      ? archived
+                        ? 'No tienes cuentas archivadas'
+                        : 'Tu primera cuenta, tu primer paso'
                       : 'No hay más cuentas'}
                   </h2>
                   <p>
                     {page === 1
-                      ? 'Añade tu efectivo, cuenta bancaria o billetera digital con su saldo inicial.'
+                      ? archived
+                        ? 'Cuando archives una cuenta aparecerá en este espacio.'
+                        : 'Añade tu efectivo, cuenta bancaria o billetera digital con su saldo inicial.'
                       : 'Regresa a la página anterior para ver tus cuentas.'}
                   </p>
                 </div>
@@ -99,6 +118,13 @@ export default async function AccountsPage({
                   className="accounts-table"
                   aria-label="Cuentas financieras"
                 >
+                  <colgroup>
+                    <col className="account-name-column" />
+                    <col className="account-currency-column" />
+                    <col className="account-opening-column" />
+                    <col className="account-current-column" />
+                    <col className="account-actions-column" />
+                  </colgroup>
                   <thead>
                     <tr>
                       <th scope="col">Cuenta</th>
@@ -109,7 +135,11 @@ export default async function AccountsPage({
                       <th scope="col" className="amount-column">
                         Saldo actual
                       </th>
-                      <th scope="col">Acciones</th>
+                      <th scope="col">
+                        <span className="account-actions-heading">
+                          Acciones
+                        </span>
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
@@ -144,21 +174,28 @@ export default async function AccountsPage({
                           )}
                         </td>
                         <td className="amount-column current-balance">
-                          {balanceResults[index].status === 'fulfilled'
-                            ? formatAmount(
-                                balanceResults[index].value.balance,
-                                account.currency,
-                              )
-                            : 'No disponible'}
+                          {archived
+                            ? 'Archivada'
+                            : balanceResults[index].status === 'fulfilled'
+                              ? formatAmount(
+                                  balanceResults[index].value.balance,
+                                  account.currency,
+                                )
+                              : 'No disponible'}
                         </td>
                         <td>
-                          <Link
-                            className="account-row-link"
-                            href={`/cuentas/${account.id}`}
-                            aria-label={`Ver movimientos de ${account.name}`}
-                          >
-                            Movimientos <ArrowUpRight size={15} />
-                          </Link>
+                          <div className="account-row-actions">
+                            {!archived && (
+                              <Link
+                                className="account-row-link"
+                                href={`/cuentas/${account.id}`}
+                                aria-label={`Ver movimientos de ${account.name}`}
+                              >
+                                Movimientos <ArrowUpRight size={15} />
+                              </Link>
+                            )}
+                            <AccountActions account={account} />
+                          </div>
                         </td>
                       </tr>
                     ))}
@@ -168,10 +205,18 @@ export default async function AccountsPage({
               {!failed && (
                 <nav className="pagination" aria-label="Páginas de cuentas">
                   {page > 1 && (
-                    <Link href={`/cuentas?page=${page - 1}`}>← Anterior</Link>
+                    <Link
+                      href={`/cuentas?page=${page - 1}${archived ? '&view=archived' : ''}`}
+                    >
+                      ← Anterior
+                    </Link>
                   )}
                   {items.length === 12 && page < 834 && (
-                    <Link href={`/cuentas?page=${page + 1}`}>Siguiente →</Link>
+                    <Link
+                      href={`/cuentas?page=${page + 1}${archived ? '&view=archived' : ''}`}
+                    >
+                      Siguiente →
+                    </Link>
                   )}
                 </nav>
               )}
@@ -184,30 +229,34 @@ export default async function AccountsPage({
               </span>
             </p>
           </section>
-          <aside className="create-panel" id="nueva-cuenta">
-            <div className="panel-heading">
-              <h2>Nueva cuenta</h2>
-            </div>
-            <p>
-              Añade tu efectivo, banco o billetera y registra desde dónde
-              empiezas.
-            </p>
-            <AccountForm />
-          </aside>
+          {archived ? (
+            <aside className="create-panel archive-help-panel">
+              <span className="empty-icon">
+                <Archive size={24} />
+              </span>
+              <h2>Tu archivo financiero</h2>
+              <p>
+                Las cuentas archivadas conservan sus movimientos. Restáuralas
+                cuando necesites volver a utilizarlas.
+              </p>
+              <Link className="button subtle" href="/cuentas">
+                Volver a cuentas activas
+              </Link>
+            </aside>
+          ) : (
+            <aside className="create-panel" id="nueva-cuenta">
+              <div className="panel-heading">
+                <h2>Nueva cuenta</h2>
+              </div>
+              <p>
+                Añade tu efectivo, banco o billetera y registra desde dónde
+                empiezas.
+              </p>
+              <AccountForm />
+            </aside>
+          )}
         </div>
       </main>
-      <footer className="accounts-bottom-bar">
-        <Link className="accounts-report-link" href="/resumen">
-          <span className="report-link-icon">
-            <ChartNoAxesCombined size={23} />
-          </span>
-          <span>
-            <strong>Descubre cómo va tu mes</strong>
-            <small>Consulta tus ingresos y gastos por categoría.</small>
-          </span>
-          <ArrowUpRight size={20} />
-        </Link>
-      </footer>
     </AppShell>
   );
 }

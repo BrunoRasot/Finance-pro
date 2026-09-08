@@ -25,6 +25,10 @@ const environmentSchema = z
     HOST: z.enum(['127.0.0.1', '0.0.0.0', '::1', '::']).default('127.0.0.1'),
     PORT: z.coerce.number().int().min(1).max(65535).default(3001),
     DATABASE_URL: z.string().refine(isDatabaseUrl).optional(),
+    REQUEST_LOG_ENABLED: z
+      .enum(['true', 'false'])
+      .default('false')
+      .transform((value) => value === 'true'),
     SUPABASE_URL: z.string().refine(isOrigin).optional(),
     CORS_ORIGINS: z
       .string()

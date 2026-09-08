@@ -10,8 +10,10 @@ import type {
   NewTransaction,
   Transaction,
   TransactionQuery,
+  TransactionChanges,
+  StoredTransaction as DomainStoredTransaction,
 } from '../../domain/transaction';
-function toTransaction(row: StoredTransaction): Transaction {
+function toTransaction(row: StoredTransaction): DomainStoredTransaction {
   return {
     id: row.id,
     accountId: row.accountId,
@@ -22,6 +24,7 @@ function toTransaction(row: StoredTransaction): Transaction {
     description: row.description,
     idempotencyKey: row.idempotencyKey,
     createdAt: row.createdAt.toISOString(),
+    transferId: row.transferId,
   };
 }
 @Injectable()
@@ -31,7 +34,7 @@ export class PrismaTransactionRepository extends TransactionRepository {
   }
   async ownsAccount(ownerId: string, accountId: string) {
     return !!(await this.database.client.account.findFirst({
-      where: { id: accountId, ownerId },
+      where: { id: accountId, ownerId, archivedAt: null },
       select: { id: true },
     }));
   }
@@ -99,6 +102,31 @@ export class PrismaTransactionRepository extends TransactionRepository {
       })
     ).map(toTransaction);
   }
+  async update(
+    ownerId: string,
+    accountId: string,
+    transactionId: string,
+    data: TransactionChanges,
+  ): Promise<Transaction | null> {
+    return this.database.client.$transaction(async (client) => {
+      const updated = await client.transaction.updateMany({
+        where: { id: transactionId, ownerId, accountId, transferId: null },
+        data: { ...data, date: new Date(`${data.date}T00:00:00.000Z`) },
+      });
+      if (updated.count !== 1) return null;
+      return toTransaction(
+        await client.transaction.findUniqueOrThrow({
+          where: { id: transactionId },
+        }),
+      );
+    });
+  }
+  async delete(ownerId: string, accountId: string, transactionId: string) {
+    const result = await this.database.client.transaction.deleteMany({
+      where: { id: transactionId, ownerId, accountId, transferId: null },
+    });
+    return result.count === 1;
+  }
   async balance(
     ownerId: string,
     accountId: string,
@@ -111,6 +139,7 @@ export class PrismaTransactionRepository extends TransactionRepository {
         (a.opening_balance + COALESCE(SUM(CASE WHEN t.type = 'INCOME' THEN t.amount ELSE -t.amount END), 0.00))::text AS balance
       FROM accounts a LEFT JOIN transactions t ON t.account_id = a.id AND t.owner_id = a.owner_id
       WHERE a.id = ${accountId}::uuid AND a.owner_id = ${ownerId}::uuid
+        AND a.archived_at IS NULL
       GROUP BY a.id, a.currency, a.opening_balance`;
     return rows[0] ?? null;
   }

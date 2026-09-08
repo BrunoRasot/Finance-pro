@@ -1,0 +1,45 @@
+{
+  "expo": {
+    "name": "Finance Pro",
+    "slug": "finance-pro",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/finance-pro-icon.png",
+    "scheme": "financepro",
+    "userInterfaceStyle": "automatic",
+    "ios": {
+      "bundleIdentifier": "com.brunorasot.financepro",
+      "supportsTablet": true,
+      "icon": "./assets/images/finance-pro-icon.png"
+    },
+    "android": {
+      "package": "com.brunorasot.financepro",
+      "adaptiveIcon": {
+        "backgroundColor": "#10231f",
+        "foregroundImage": "./assets/images/finance-pro-icon.png"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "output": "static",
+      "favicon": "./assets/images/finance-pro-icon.png"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-sqlite",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#10231f",
+          "image": "./assets/images/finance-pro-icon.png",
+          "imageWidth": 112
+        }
+      ],
+      "expo-sharing"
+    ],
+    "experiments": {
+      "typedRoutes": true,
+      "reactCompiler": true
+    }
+  }
+}

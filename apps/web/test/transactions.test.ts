@@ -2,6 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
   transactionInputSchema,
+  transactionChangesSchema,
   filtersSchema,
   historyQuery,
   displayDate,
@@ -57,6 +58,21 @@ test('enforces actual calendar dates, matching categories and retry keys', () =>
       category: 'OTHER',
     }).success,
     true,
+  );
+});
+test('validates editable movement fields without requiring a retry key', () => {
+  const changes = {
+    type: valid.type,
+    category: valid.category,
+    amount: valid.amount,
+    date: valid.date,
+    description: valid.description,
+  };
+  assert.equal(transactionChangesSchema.parse(changes).description, 'Almuerzo');
+  assert.equal(
+    transactionChangesSchema.safeParse({ ...changes, category: 'SALARY' })
+      .success,
+    false,
   );
 });
 test('history pagination preserves filters and stays within backend bounds', () => {

@@ -10,6 +10,10 @@ export const categories = {
   ENTERTAINMENT: { label: 'Entretenimiento', type: 'EXPENSE' },
   OTHER: { label: 'Otros', type: 'BOTH' },
 } as const;
+export const historyCategories = {
+  ...categories,
+  TRANSFER: { label: 'Transferencia', type: 'BOTH' },
+} as const;
 export const categorySchema = z.enum([
   'SALARY',
   'FREELANCE',
@@ -21,31 +25,43 @@ export const categorySchema = z.enum([
   'ENTERTAINMENT',
   'OTHER',
 ]);
+export const historyCategorySchema = z.enum([
+  ...categorySchema.options,
+  'TRANSFER',
+]);
 export const dateSchema = z.iso
   .date()
   .refine((value) => !value.startsWith('0000'));
-export const transactionInputSchema = z
-  .object({
-    type: z.enum(['INCOME', 'EXPENSE']),
-    category: categorySchema,
-    amount: z
-      .string()
-      .regex(/^(?!0(?:\.0{1,2})?$)(0|[1-9]\d{0,15})(\.\d{1,2})?$/),
-    date: dateSchema,
-    description: z.string().trim().max(250),
-    idempotencyKey: z.uuidv4(),
-  })
-  .refine(
-    (value) =>
-      categories[value.category].type === 'BOTH' ||
-      categories[value.category].type === value.type,
-    { message: 'La categoría no corresponde al tipo.' },
-  );
+const transactionFieldsSchema = z.object({
+  type: z.enum(['INCOME', 'EXPENSE']),
+  category: categorySchema,
+  amount: z
+    .string()
+    .regex(/^(?!0(?:\.0{1,2})?$)(0|[1-9]\d{0,15})(\.\d{1,2})?$/),
+  date: dateSchema,
+  description: z.string().trim().max(250),
+});
+const categoryMatchesType = (value: {
+  type: 'INCOME' | 'EXPENSE';
+  category: keyof typeof categories;
+}) =>
+  categories[value.category].type === 'BOTH' ||
+  categories[value.category].type === value.type;
+export const transactionInputSchema = transactionFieldsSchema
+  .extend({ idempotencyKey: z.uuidv4() })
+  .refine(categoryMatchesType, {
+    message: 'La categoría no corresponde al tipo.',
+  });
 export type TransactionInput = z.infer<typeof transactionInputSchema>;
+export const transactionChangesSchema = transactionFieldsSchema.refine(
+  categoryMatchesType,
+  { message: 'La categoría no corresponde al tipo.' },
+);
+export type TransactionChanges = z.infer<typeof transactionChangesSchema>;
 export const filtersSchema = z
   .object({
     type: z.enum(['INCOME', 'EXPENSE']).optional(),
-    category: categorySchema.optional(),
+    category: historyCategorySchema.optional(),
     from: dateSchema.optional(),
     to: dateSchema.optional(),
     page: z.coerce.number().int().min(1).max(501).default(1),

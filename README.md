@@ -4,7 +4,9 @@ Aplicación personal de finanzas para web y móvil, con intención de publicarse
 
 ## Estado actual
 
-El backend en `apps/api` incluye NestJS, PostgreSQL con Prisma, verificación JWT de Supabase, cuentas, ingresos/gastos, historial filtrable y saldo calculado con aislamiento por usuario. La web en `apps/web` incluye Next.js, registro, acceso, recuperación de contraseña y una vista privada para crear y listar cuentas. La web también incluye movimientos, filtros de historial y saldos actuales. La aplicación móvil sigue pendiente. Ver [contrato de movimientos](docs/transactions-api.md).
+Versión candidata **1.0.0-rc.1**. El cierre técnico y los pasos externos pendientes están registrados en la [guía de lanzamiento](docs/release-v1.md). No es todavía un despliegue público ni una publicación en tiendas.
+
+El backend en `apps/api` incluye NestJS, PostgreSQL con Prisma, verificación JWT de Supabase, cuentas, ingresos/gastos, transferencias atómicas, presupuestos mensuales, metas de ahorro con aportes, exportación de datos, historial filtrable y saldo calculado con aislamiento por usuario. La web en `apps/web` incluye Next.js y las vistas privadas de gestión. La aplicación Expo en `apps/mobile` comparte autenticación, API y datos para ofrecer resumen, administración de cuentas y movimientos, transferencias, presupuestos, metas, exportaciones y temas claro/oscuro en Android e iOS. Ver [contrato de movimientos](docs/transactions-api.md), [transferencias](docs/transfers-api.md), [presupuestos](docs/budgets-api.md), [metas de ahorro](docs/goals-api.md), [exportaciones](docs/exports-api.md) y [guía móvil](apps/mobile/README.md).
 
 ## Stack
 
@@ -21,7 +23,7 @@ El backend en `apps/api` incluye NestJS, PostgreSQL con Prisma, verificación JW
 finance-pro/
   apps/
     web/        # Aplicación Next.js
-    mobile/     # Próxima aplicación Expo
+    mobile/     # Aplicación Expo para Android, iOS y web móvil
     api/        # API NestJS
   packages/     # Futuros paquetes compartidos
 ```
@@ -61,14 +63,17 @@ Consultar <http://127.0.0.1:3001/api/v1/health/live>: responde `{"status":"ok"}`
 
 ## Comandos desde la raíz
 
-Si el backend ya está configurado para Supabase, no se necesita Docker para ejecutar la aplicación. Desde la raíz, iniciar `pnpm dev:api` y `pnpm dev:web` en dos terminales. La conexión requiere internet. Para configurar una instalación nueva con Supabase, consultar [la guía del backend](apps/api/README.md#supabase).
+Si el backend ya está configurado para Supabase, no se necesita Docker para ejecutar la aplicación. Desde la raíz, ejecutar `pnpm dev` para iniciar una única API y la web. Esa API también queda disponible para el teléfono en la red local. En otra terminal se puede ejecutar `pnpm dev:mobile`; no se debe iniciar además `pnpm dev:api:mobile`. La conexión requiere internet. Para configurar una instalación nueva con Supabase, consultar [la guía del backend](apps/api/README.md#supabase).
 
 Para iniciar la web, completar `apps/web/.env.local` siguiendo [la guía web](apps/web/README.md), mantener la API ejecutándose y abrir otra terminal con `pnpm dev:web`. Visitar `http://localhost:3000`.
 
 | Comando                 | Función                                      |
 | ----------------------- | -------------------------------------------- |
-| `pnpm dev:api`          | API con recarga durante desarrollo           |
-| `pnpm dev:web`          | Web con recarga durante desarrollo           |
+| `pnpm dev`              | API compartida y web durante desarrollo      |
+| `pnpm dev:api`          | Solo la API con recarga durante desarrollo   |
+| `pnpm dev:web`          | Solo la web con recarga durante desarrollo   |
+| `pnpm dev:mobile`       | Expo con código QR para Android y iOS        |
+| `pnpm dev:api:mobile`   | API temporalmente accesible en la red local  |
 | `pnpm build`            | Compilar API y web                           |
 | `pnpm start:web`        | Ejecutar la web compilada                    |
 | `pnpm start:api`        | Ejecutar el backend compilado                |
@@ -89,4 +94,4 @@ El flujo de GitHub Actions ejecutará formato, lint, tipos, pruebas y compilaci�
 
 ## Próxima etapa
 
-El recorrido de registro, acceso, cuentas, ingresos, gastos, historial y saldo fue validado manualmente por el propietario del proyecto. Ya se incluye el [resumen mensual](docs/reports-api.md), accesible desde «Ver resumen mensual», con ingresos, gastos y categorías por moneda. Los siguientes incrementos son presupuestos y metas de ahorro. Nunca versionar credenciales ni archivos `.env` reales.
+El recorrido de registro, acceso, cuentas, ingresos, gastos, historial y saldo fue validado manualmente por el propietario del proyecto. La candidata incluye el resumen mensual, transferencias, presupuestos, metas, exportación y aplicación móvil. `pnpm verify:release` ejecuta formato, lint, tipos, pruebas, simulacro de recuperación y compilaciones; requiere una base PostgreSQL de pruebas migrada, Node 24, pnpm 11 y herramientas PostgreSQL 17. El despliegue y la prueba del instalador móvil se completan siguiendo [release-v1.md](docs/release-v1.md). Nunca versionar credenciales, respaldos ni archivos `.env` reales.

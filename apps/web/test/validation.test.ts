@@ -5,6 +5,7 @@ import {
   safeDestination,
   formatAmount,
   credentialsSchema,
+  accountChangesSchema,
 } from '../src/lib/validation.ts';
 test('callback never redirects to untrusted origins or paths', () => {
   for (const value of [
@@ -54,6 +55,19 @@ test('accounts reject imprecise and unsupported financial inputs', () => {
   );
   assert.equal(
     newAccountSchema.safeParse({ ...valid, name: '  ' }).success,
+    false,
+  );
+});
+test('account maintenance keeps currency outside editable fields', () => {
+  const changes = {
+    name: ' Cuenta diaria ',
+    type: 'CASH',
+    openingBalance: '25.50',
+  };
+  assert.equal(accountChangesSchema.parse(changes).name, 'Cuenta diaria');
+  assert.equal(
+    accountChangesSchema.safeParse({ ...changes, openingBalance: '-1' })
+      .success,
     false,
   );
 });

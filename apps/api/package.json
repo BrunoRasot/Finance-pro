@@ -1,12 +1,15 @@
 {
   "name": "@finance-pro/api",
-  "version": "0.1.0",
+  "version": "1.0.0-rc.1",
   "private": true,
   "scripts": {
+    "test:recovery": "node scripts/recovery-drill.mjs",
+    "db:backup:supabase": "node scripts/supabase-db.mjs backup",
+    "dev": "prisma generate && nest start --watch --path tsconfig.dev.json --no-shell",
     "db:check:supabase": "node scripts/supabase-db.mjs check",
     "db:migrate:supabase": "node scripts/supabase-db.mjs migrate",
     "build": "prisma generate && nest build",
-    "start:dev": "prisma generate && nest start --watch",
+    "start:dev": "pnpm run dev",
     "start:prod": "node dist/main.js",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "lint": "eslint src test --max-warnings=0",

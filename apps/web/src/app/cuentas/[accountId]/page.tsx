@@ -5,17 +5,24 @@ import { z } from 'zod';
 import { ArrowDownLeft, ArrowUpRight } from 'lucide-react';
 import { requireUser } from '@/lib/auth';
 import { findAccount } from '@/lib/accounts';
-import { getBalance, getMovements } from '@/lib/transactions';
+import { getBalance, getMovements, type Movement } from '@/lib/transactions';
 import { formatAmount } from '@/lib/validation';
 import { AppShell } from '@/components/app-shell';
 
 import { MovementForm } from '@/features/transactions/movement-form';
+import { MovementActions } from '@/features/transactions/movement-actions';
 import {
-  categories,
+  historyCategories,
   displayDate,
   filtersSchema,
   historyQuery,
+  type TransactionChanges,
 } from '@/features/transactions/model';
+function isEditableMovement(
+  movement: Movement,
+): movement is Movement & TransactionChanges {
+  return movement.category !== 'TRANSFER';
+}
 export const metadata = { title: 'Movimientos de cuenta' };
 export default async function AccountPage({
   params,
@@ -50,7 +57,10 @@ export default async function AccountPage({
   const path = `/cuentas/${accountId}`;
   return (
     <AppShell>
-      <main className="workspace-main" id="main-content">
+      <main
+        className="workspace-main account-detail-overview"
+        id="main-content"
+      >
         <Link className="back-link" href="/cuentas">
           ← Mis cuentas
         </Link>
@@ -61,12 +71,6 @@ export default async function AccountPage({
             <span>.</span>
           </h1>
           <p>Cada movimiento cuenta. Aquí puedes seguir el tuyo.</p>
-          <Link
-            className="button subtle detail-create"
-            href="#nuevo-movimiento"
-          >
-            Registrar movimiento <ArrowUpRight size={16} />
-          </Link>
         </div>
         {balance ? (
           <section
@@ -125,7 +129,7 @@ export default async function AccountPage({
                 Categoría
                 <select name="category" defaultValue={filters.category ?? ''}>
                   <option value="">Todas</option>
-                  {Object.entries(categories).map(([key, value]) => (
+                  {Object.entries(historyCategories).map(([key, value]) => (
                     <option value={key} key={key}>
                       {value.label}
                     </option>
@@ -183,10 +187,10 @@ export default async function AccountPage({
                     <div className="movement-description">
                       <strong>
                         {movement.description ||
-                          categories[movement.category].label}
+                          historyCategories[movement.category].label}
                       </strong>
                       <span>
-                        {categories[movement.category].label} ·{' '}
+                        {historyCategories[movement.category].label} ·{' '}
                         {displayDate(movement.date)} ·{' '}
                         {movement.type === 'INCOME' ? 'Ingreso' : 'Gasto'}
                       </span>
@@ -199,6 +203,12 @@ export default async function AccountPage({
                       {movement.type === 'INCOME' ? '+' : '−'}{' '}
                       {formatAmount(movement.amount, account.currency)}
                     </strong>
+                    {isEditableMovement(movement) && (
+                      <MovementActions
+                        accountId={accountId}
+                        movement={movement}
+                      />
+                    )}
                   </li>
                 ))}
               </ul>

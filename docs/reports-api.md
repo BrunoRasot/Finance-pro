@@ -6,7 +6,7 @@ Requiere JWT Supabase en `Authorization: Bearer <access_token>`. El mes es oblig
 
 El resumen reúne todas las cuentas del propietario verificado. Usa la fecha de calendario del movimiento, desde el primer día incluido hasta el primer día del siguiente mes excluido. Incluye movimientos futuros si pertenecen al mes seleccionado.
 
-Siempre devuelve dos grupos, PEN y USD, incluso sin movimientos. Los saldos iniciales no son ingresos. `net` es ingresos menos gastos del mes, no el saldo de las cuentas ni una meta de ahorro.
+Siempre devuelve dos grupos, PEN y USD, incluso sin movimientos. Los saldos iniciales y las transferencias internas no son ingresos. `net` es ingresos menos gastos del mes, no el saldo de las cuentas ni una meta de ahorro.
 
 ```json
 {

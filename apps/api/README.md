@@ -56,6 +56,8 @@ Las rutas de cuentas están documentadas en [accounts-api.md](../../docs/account
 
 Los errores tienen `statusCode`, `message`, `requestId` y `timestamp`. El identificador también se envía en `X-Request-Id`. Los fallos de servidor usan un mensaje genérico. Los registros de estos fallos contienen evento, identificador y código de estado, sin cuerpo, tokens, consulta ni stack del error.
 
+`REQUEST_LOG_ENABLED=true` registra además método, estado y duración de las peticiones con su identificador. No registra URL, consulta, cuerpo, IP ni tokens. El despliegue de ejemplo lo activa y limita el tamaño de los archivos de log.
+
 ## Seguridad de esta etapa
 
 - `AccessGuard` requiere un JWT válido en las rutas privadas. Solo las rutas de salud son públicas. Sin `SUPABASE_URL`, el acceso privado permanece bloqueado.
@@ -97,3 +99,5 @@ La web ya incluye el flujo de acceso. La base de datos del proyecto usa Supabase
 5. Ejecutar `pnpm dev:api` y verificar `/api/v1/health/ready`.
 
 Las pruebas de integración siempre usan `TEST_DATABASE_URL` en una base dedicada cuyo nombre termina en `_test`; no usar la conexión de Supabase para pruebas destructivas.
+
+La [guía de lanzamiento](../../docs/release-v1.md) documenta `test:recovery`, `db:backup:supabase`, la separación de roles y la restauración verificada.

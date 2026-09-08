@@ -62,6 +62,7 @@ async function createApp(limit = 100): Promise<NestExpressApplication> {
           NODE_ENV: 'test',
           CORS_ORIGINS: 'http://localhost:3000',
           RATE_LIMIT_MAX: limit,
+          REQUEST_LOG_ENABLED: 'true',
         }),
       ),
     )
@@ -197,6 +198,31 @@ describe('API HTTP and security boundaries', () => {
   it('returns a structured 404', async () => {
     const response = await request(server).get('/api/v1/missing').expect(404);
     expect(response.body).toMatchObject({ statusCode: 404 });
+  });
+
+  it('records latency and request IDs without private paths, bodies or tokens', async () => {
+    const logger = jest
+      .spyOn(Logger.prototype, 'log')
+      .mockImplementation(() => undefined);
+    try {
+      const response = await request(server)
+        .post('/api/v1/test/validate?secret=private-query')
+        .set('Authorization', 'Bearer private-token')
+        .send({ name: 'private-description' })
+        .expect(201);
+      expect(logger).toHaveBeenCalledWith(
+        expect.objectContaining({
+          event: 'request_completed',
+          requestId: response.headers['x-request-id'],
+          method: 'POST',
+          statusCode: 201,
+          durationMs: expect.any(Number) as unknown,
+        }),
+      );
+      expect(JSON.stringify(logger.mock.calls)).not.toContain('private-');
+    } finally {
+      logger.mockRestore();
+    }
   });
 
   it('limits requests without trusting spoofed forwarded IPs', async () => {

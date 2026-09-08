@@ -10,7 +10,7 @@ permissions:
 jobs:
   verify:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 25
     services:
       postgres:
         image: postgres:17
@@ -25,6 +25,10 @@ jobs:
           --health-interval 5s --health-timeout 5s --health-retries 10
     env:
       TEST_DATABASE_URL: postgresql://finance_pro:ci_only_password@127.0.0.1:5432/finance_pro_test
+      # Public compile-only placeholders. These artifacts are not deployed.
+      EXPO_PUBLIC_SUPABASE_URL: https://build-placeholder.supabase.co
+      EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable_build_only_not_for_runtime
+      EXPO_PUBLIC_API_BASE_URL: https://build-placeholder.invalid/api/v1
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -40,4 +44,14 @@ jobs:
       - run: pnpm typecheck
       - run: pnpm test
       - run: pnpm test:integration
+      - name: PostgreSQL 17 backup tools
+        shell: bash
+        run: |
+          mkdir -p "$RUNNER_TEMP/pgtools"
+          cp scripts/ci-postgres-tool.sh "$RUNNER_TEMP/pgtools/pg_dump"
+          cp scripts/ci-postgres-tool.sh "$RUNNER_TEMP/pgtools/pg_restore"
+          chmod +x "$RUNNER_TEMP/pgtools/pg_dump" "$RUNNER_TEMP/pgtools/pg_restore"
+          echo "$RUNNER_TEMP/pgtools" >> "$GITHUB_PATH"
+      - run: pnpm test:recovery
       - run: pnpm build
+      - run: pnpm build:mobile

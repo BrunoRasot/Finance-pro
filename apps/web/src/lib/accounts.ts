@@ -10,6 +10,7 @@ const accountSchema = z.object({
   currency: z.enum(['PEN', 'USD']),
   openingBalance: z.string().regex(/^\d+\.\d{2}$/),
   createdAt: z.string(),
+  archivedAt: z.string().nullable(),
 });
 export type Account = z.infer<typeof accountSchema>;
 export async function findAccount(id: string) {
@@ -21,8 +22,14 @@ export async function findAccount(id: string) {
 export async function accountsRequest(path: string, init?: RequestInit) {
   return apiRequest(`/accounts${path}`, init);
 }
-export async function listAccounts(offset: number) {
-  const response = await accountsRequest(`?limit=12&offset=${offset}`);
+export async function listAccounts(
+  offset: number,
+  status: 'ACTIVE' | 'ARCHIVED' = 'ACTIVE',
+  limit = 12,
+) {
+  const response = await accountsRequest(
+    `?limit=${limit}&offset=${offset}&status=${status}`,
+  );
   if (!response.ok) throw new Error('Accounts unavailable');
   return z
     .object({

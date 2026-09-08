@@ -22,7 +22,19 @@ Base: `/api/v1`. Todas las rutas requieren `Authorization: Bearer <access_token>
 - `description`: opcional, por defecto vacía, máximo 250 caracteres después de quitar espacios exteriores.
 - `idempotencyKey`: UUID v4 generado una vez por cada operación. Conservarlo al reintentar una solicitud cuyo resultado sea incierto; generar otro solo para un movimiento nuevo.
 
-Respuesta 201: `id`, `accountId`, `type`, `category`, `amount` con dos decimales, `date`, `description`, `idempotencyKey` y `createdAt` UTC. Repetir la misma clave y datos devuelve el mismo movimiento (también 201); usarla con datos distintos o en otra cuenta del mismo usuario responde 409. La unicidad en PostgreSQL evita duplicados incluso con solicitudes simultáneas. `0.1` y `0.10` son el mismo importe.
+Respuesta 201: `id`, `accountId`, `type`, `category`, `amount` con dos decimales, `date`, `description`, `idempotencyKey`, `transferId` (`null` para movimientos manuales) y `createdAt` UTC. Repetir la misma clave y datos devuelve el mismo movimiento (también 201); usarla con datos distintos o en otra cuenta del mismo usuario responde 409. La unicidad en PostgreSQL evita duplicados incluso con solicitudes simultáneas. `0.1` y `0.10` son el mismo importe.
+
+## Editar un movimiento
+
+`PATCH /accounts/<accountId>/transactions/<transactionId>`
+
+Requiere el cuerpo completo editable: `type`, `category`, `amount`, `date` y `description`. No acepta `idempotencyKey`, propietario, cuenta ni moneda. Aplica las mismas validaciones financieras que la creación y devuelve el movimiento actualizado. Una cuenta o movimiento inexistente o ajeno responde 404 sin revelar su existencia. El saldo y los reportes se recalculan desde los datos guardados.
+
+## Eliminar un movimiento
+
+`DELETE /accounts/<accountId>/transactions/<transactionId>`
+
+Devuelve `{ "deleted": true }`. Solo elimina el movimiento cuando tanto la cuenta como el movimiento pertenecen al usuario autenticado. La operación es permanente y actualiza los saldos y reportes derivados. Repetir la eliminación responde 404.
 
 ## Categorías predefinidas
 
@@ -62,7 +74,7 @@ Se aplican autenticación, validación estricta, límites de peticiones y `Cache
 
 Errores: 400 datos inválidos, 401 acceso inválido, 404 cuenta no accesible, 409 conflicto de idempotencia, 429 límite de solicitudes y 500/503 dependencia o fallo interno saneado.
 
-No hay edición, eliminación ni transferencias todavía. La web consume estos endpoints desde `/cuentas/<accountId>` y muestra saldos calculados tanto en el detalle como en las tarjetas de cuentas.
+Las transferencias generan movimientos de sistema con categoría `TRANSFER` y `transferId`. Aparecen en el historial y afectan el saldo de cada cuenta, pero no pueden editarse o eliminarse individualmente y se excluyen del resumen mensual. La web consume estos endpoints desde `/cuentas/<accountId>`, permite mantener movimientos manuales y muestra saldos calculados tanto en el detalle como en las cuentas.
 
 ## Verificación
 

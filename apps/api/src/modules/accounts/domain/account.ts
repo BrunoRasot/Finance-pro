@@ -8,6 +8,8 @@ export interface Account {
   currency: (typeof CURRENCIES)[number];
   openingBalance: string;
   createdAt: string;
+  archivedAt: string | null;
 }
 
-export type NewAccount = Omit<Account, 'id' | 'createdAt'>;
+export type NewAccount = Omit<Account, 'id' | 'createdAt' | 'archivedAt'>;
+export type AccountChanges = Pick<Account, 'name' | 'type' | 'openingBalance'>;

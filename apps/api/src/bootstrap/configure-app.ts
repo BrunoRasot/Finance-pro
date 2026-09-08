@@ -5,6 +5,7 @@ import { json } from 'express';
 import helmet from 'helmet';
 import type { Environment } from '../config/environment';
 import { requestIdMiddleware } from '../common/http/request-id.middleware';
+import { requestLogMiddleware } from '../common/http/request-log.middleware';
 
 export function configureApp(app: NestExpressApplication): void {
   const config = app.get(ConfigService<Environment, true>);
@@ -13,6 +14,8 @@ export function configureApp(app: NestExpressApplication): void {
   // Do not trust forwarded client IPs until the deployment proxy is known.
   app.set('trust proxy', false);
   app.use(requestIdMiddleware);
+  if (config.get('REQUEST_LOG_ENABLED', { infer: true }))
+    app.use(requestLogMiddleware);
   app.use(helmet());
   app.enableCors({
     origin: config.get('CORS_ORIGINS', { infer: true }),

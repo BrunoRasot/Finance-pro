@@ -6,12 +6,15 @@ import {
   Param,
   ParseUUIDPipe,
   Post,
+  Patch,
+  Delete,
   Query,
 } from '@nestjs/common';
 import { CurrentUser } from '../../../common/security/current-user.decorator';
 import { TransactionsService } from '../application/transactions.service';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { ListTransactionsDto } from './dto/list-transactions.dto';
+import { UpdateTransactionDto } from './dto/update-transaction.dto';
 @Controller('accounts/:accountId')
 export class TransactionsController {
   constructor(private readonly transactions: TransactionsService) {}
@@ -32,6 +35,25 @@ export class TransactionsController {
     @Query() query: ListTransactionsDto,
   ) {
     return this.transactions.list(ownerId, accountId, query);
+  }
+  @Patch('transactions/:transactionId')
+  @Header('Cache-Control', 'no-store')
+  update(
+    @CurrentUser() ownerId: string,
+    @Param('accountId', new ParseUUIDPipe()) accountId: string,
+    @Param('transactionId', new ParseUUIDPipe()) transactionId: string,
+    @Body() dto: UpdateTransactionDto,
+  ) {
+    return this.transactions.update(ownerId, accountId, transactionId, dto);
+  }
+  @Delete('transactions/:transactionId')
+  @Header('Cache-Control', 'no-store')
+  delete(
+    @CurrentUser() ownerId: string,
+    @Param('accountId', new ParseUUIDPipe()) accountId: string,
+    @Param('transactionId', new ParseUUIDPipe()) transactionId: string,
+  ) {
+    return this.transactions.delete(ownerId, accountId, transactionId);
   }
   @Get('balance')
   @Header('Cache-Control', 'no-store')

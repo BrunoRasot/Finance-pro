@@ -1,5 +1,6 @@
 import { AuthLayout } from '@/components/auth-layout';
 import { AuthForm } from '@/features/auth/auth-form';
+import { ShieldCheck } from 'lucide-react';
 export const metadata = { title: 'Iniciar sesión' };
 export default async function LoginPage({
   searchParams,
@@ -23,6 +24,9 @@ export default async function LoginPage({
         </p>
       )}
       <AuthForm mode="login" />
+      <p className="auth-security-note">
+        <ShieldCheck size={15} /> Acceso protegido a tu información financiera
+      </p>
     </AuthLayout>
   );
 }

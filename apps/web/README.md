@@ -28,10 +28,12 @@ Las cookies son HttpOnly, SameSite=Lax y Secure en producción. Cada página pri
 
 ## Alcance actual
 
-Registro, acceso, cierre de sesión, recuperación de contraseña, listado paginado y creación de cuentas. Las tarjetas muestran el saldo actual y enlazan a `/cuentas/<accountId>`, donde se registran ingresos/gastos y se consulta el historial por tipo, categoría y fechas. El resumen usa todos los movimientos registrados, también los de fecha futura; los filtros no cambian el saldo. No hay presupuestos, reportes, edición ni eliminación de movimientos.
+Registro, acceso, cierre de sesión y recuperación de contraseña. Creación, edición, archivado y restauración de cuentas; ingresos y gastos con edición, eliminación e historial filtrable; transferencias entre cuentas de la misma moneda; resumen mensual, presupuestos, metas y aportes, y exportación JSON/CSV. Los saldos incluyen todos los movimientos registrados, también los de fecha futura; los filtros no cambian el saldo.
 
 La creación conserva una clave de idempotencia hasta recibir confirmación. Si el resultado es incierto, bloquea los campos y permite reintentar el mismo envío; revisar el historial antes de cerrar o recargar. La clave y los datos pendientes están en memoria del formulario, no sobreviven a una recarga completa. Después de un éxito se genera una clave nueva y se actualizan detalle y tarjetas.
 
 Prueba manual: iniciar sesión, abrir «Ver movimientos», registrar un ingreso y un gasto, comprobar el saldo, filtrar por fechas y recargar. Las pruebas automatizadas validan importes, fechas, categorías, paginación y centavos negativos; las pruebas PostgreSQL del backend cubren aislamiento e idempotencia concurrente.
 
 Antes de publicar: configurar el dominio HTTPS y callbacks exactos de producción, SMTP, límites de autenticación adecuados al tráfico y observabilidad. Revisar las opciones de contraseña del proyecto Supabase para alinearlas con el mínimo de 12 caracteres de esta web.
+
+Consultar la [guía de lanzamiento y operación](../../docs/release-v1.md). Los contenedores se compilan sin credenciales y reciben la configuración al arrancar.

@@ -27,19 +27,30 @@ La API valida firma ES256/RS256, emisor, audiencia, expiración y usuario. Las c
 - Monto inicial: string decimal no negativo, máximo 16 dígitos enteros y 2 decimales. No enviar números JSON ni notación científica.
 - No enviar `ownerId`, `userId`, `id` ni campos adicionales.
 
-Respuesta 201: `id`, `name`, `type`, `currency`, `openingBalance` (siempre con dos decimales) y `createdAt` (UTC). La propiedad se deriva del JWT. Los nombres no son únicos y reintentar un POST exitoso crea otra cuenta; todavía no hay idempotencia para esta operación.
+Respuesta 201: `id`, `name`, `type`, `currency`, `openingBalance` (siempre con dos decimales), `createdAt` (UTC) y `archivedAt` (`null` al crear). La propiedad se deriva del JWT. Los nombres no son únicos y reintentar un POST exitoso crea otra cuenta; todavía no hay idempotencia para esta operación.
 
 `openingBalance` es un monto inicial registrado. El saldo actualizado se consulta en `GET /accounts/<uuid>/balance`, documentado en [movimientos](transactions-api.md). Esta etapa no admite tipos de cuenta de deuda ni saldos iniciales negativos; el saldo calculado sí puede ser negativo.
 
 ## Listar
 
-`GET /accounts?limit=20&offset=0`
+`GET /accounts?limit=20&offset=0&status=ACTIVE`
 
-Devuelve `items`, `limit` y `offset`. Solo incluye cuentas propias, ordenadas por creación e identificador descendentes. `limit`: 1–100. `offset`: 0–10000. No se devuelve un total ni se permite filtrar por otro propietario.
+Devuelve `items`, `limit` y `offset`. `status` admite `ACTIVE` (predeterminado) o `ARCHIVED`. Solo incluye cuentas propias con ese estado, ordenadas por creación e identificador descendentes. `limit`: 1–100. `offset`: 0–10000. No se devuelve un total ni se permite filtrar por otro propietario.
 
 ## Consultar una cuenta
 
 `GET /accounts/<uuid>` devuelve la cuenta propia. Una cuenta ajena y una inexistente producen el mismo 404.
+
+## Editar una cuenta
+
+`PATCH /accounts/<uuid>` requiere el cuerpo completo editable: `name`, `type` y `openingBalance`. La moneda no se admite porque cambiarla reinterpretaría los movimientos históricos. Solo se editan cuentas activas; una cuenta archivada, ajena o inexistente responde 404.
+
+## Archivar y restaurar
+
+- `POST /accounts/<uuid>/archive` establece `archivedAt` y conserva la cuenta y todos sus movimientos.
+- `POST /accounts/<uuid>/restore` vuelve a establecer `archivedAt` en `null`.
+
+Ambas operaciones son idempotentes. Una cuenta archivada desaparece del listado activo y no acepta consultas de saldo ni movimientos nuevos hasta ser restaurada. Sus movimientos permanecen almacenados y siguen formando parte de los reportes históricos.
 
 ## Respuestas de error
 
@@ -51,4 +62,4 @@ Devuelve `items`, `limit` y `offset`. Solo incluye cuentas propias, ordenadas po
 | 429       | Límite de peticiones excedido                                     |
 | 500 / 503 | Fallo interno o dependencia no disponible, sin detalles sensibles |
 
-No hay rutas para editar, eliminar ni transferir fondos todavía.
+No existe eliminación permanente de cuentas. Las transferencias entre cuentas se describen en [transfers-api.md](transfers-api.md).

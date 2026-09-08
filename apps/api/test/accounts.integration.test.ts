@@ -70,6 +70,16 @@ describe('Accounts with PostgreSQL and verified JWTs', () => {
 
   it('requires authentication', async () => {
     await request(server).get('/api/v1/accounts').expect(401);
+    await request(server)
+      .patch(`/api/v1/accounts/${randomUUID()}`)
+      .send({ name: 'Cuenta', type: 'BANK', openingBalance: '0.00' })
+      .expect(401);
+    await request(server)
+      .post(`/api/v1/accounts/${randomUUID()}/archive`)
+      .expect(401);
+    await request(server)
+      .post(`/api/v1/accounts/${randomUUID()}/restore`)
+      .expect(401);
   });
 
   it('persists the exact opening amount and server-derived owner', async () => {
@@ -173,5 +183,107 @@ describe('Accounts with PostgreSQL and verified JWTs', () => {
         },
       }),
     ).rejects.toThrow();
+  });
+
+  it('updates editable fields without allowing ownership or currency changes', async () => {
+    const response = await request(server)
+      .patch(`/api/v1/accounts/${accountId}`)
+      .auth(tokenA, { type: 'bearer' })
+      .send({
+        name: '  Cuenta principal  ',
+        type: 'BANK',
+        openingBalance: '125.50',
+      })
+      .expect(200);
+    expect(response.body).toMatchObject({
+      id: accountId,
+      name: 'Cuenta principal',
+      type: 'BANK',
+      currency: 'PEN',
+      openingBalance: '125.50',
+      archivedAt: null,
+    });
+    await request(server)
+      .patch(`/api/v1/accounts/${accountId}`)
+      .auth(tokenA, { type: 'bearer' })
+      .send({
+        name: 'Cuenta',
+        type: 'BANK',
+        openingBalance: '0.00',
+        currency: 'USD',
+      })
+      .expect(400);
+    await request(server)
+      .patch(`/api/v1/accounts/${accountId}`)
+      .auth(tokenB, { type: 'bearer' })
+      .send({ name: 'Cuenta', type: 'BANK', openingBalance: '0.00' })
+      .expect(404);
+  });
+
+  it('archives accounts without deleting data and restores them idempotently', async () => {
+    const archived = await request(server)
+      .post(`/api/v1/accounts/${accountId}/archive`)
+      .auth(tokenA, { type: 'bearer' })
+      .expect(201);
+    expect((archived.body as { archivedAt: string }).archivedAt).toEqual(
+      expect.any(String),
+    );
+    await request(server)
+      .post(`/api/v1/accounts/${accountId}/archive`)
+      .auth(tokenA, { type: 'bearer' })
+      .expect(201);
+    await request(server)
+      .get(`/api/v1/accounts/${accountId}`)
+      .auth(tokenA, { type: 'bearer' })
+      .expect(404);
+    const active = await request(server)
+      .get('/api/v1/accounts?status=ACTIVE')
+      .auth(tokenA, { type: 'bearer' })
+      .expect(200);
+    expect((active.body as { items: unknown[] }).items).not.toEqual(
+      expect.arrayContaining([expect.objectContaining({ id: accountId })]),
+    );
+    const archivedList = await request(server)
+      .get('/api/v1/accounts?status=ARCHIVED')
+      .auth(tokenA, { type: 'bearer' })
+      .expect(200);
+    expect((archivedList.body as { items: unknown[] }).items).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ id: accountId, name: 'Cuenta principal' }),
+      ]),
+    );
+    await request(server)
+      .patch(`/api/v1/accounts/${accountId}`)
+      .auth(tokenA, { type: 'bearer' })
+      .send({ name: 'Cuenta', type: 'CASH', openingBalance: '0.00' })
+      .expect(404);
+    await request(server)
+      .post(`/api/v1/accounts/${accountId}/archive`)
+      .auth(tokenB, { type: 'bearer' })
+      .expect(404);
+    const restored = await request(server)
+      .post(`/api/v1/accounts/${accountId}/restore`)
+      .auth(tokenA, { type: 'bearer' })
+      .expect(201);
+    expect(restored.body).toMatchObject({ id: accountId, archivedAt: null });
+    await request(server)
+      .post(`/api/v1/accounts/${accountId}/restore`)
+      .auth(tokenA, { type: 'bearer' })
+      .expect(201);
+    await request(server)
+      .get(`/api/v1/accounts/${accountId}`)
+      .auth(tokenA, { type: 'bearer' })
+      .expect(200);
+  });
+
+  it('validates archive filters and maintenance identifiers', async () => {
+    await request(server)
+      .get('/api/v1/accounts?status=DELETED')
+      .auth(tokenA, { type: 'bearer' })
+      .expect(400);
+    await request(server)
+      .post('/api/v1/accounts/not-a-uuid/archive')
+      .auth(tokenA, { type: 'bearer' })
+      .expect(400);
   });
 });

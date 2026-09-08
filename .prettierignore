@@ -1,8 +1,12 @@
 node_modules
 dist
+dist-native/
 coverage
 pnpm-lock.yaml
 apps/api/src/generated/
 .next/
 *.tsbuildinfo
 apps/web/next-env.d.ts
+apps/mobile/expo-env.d.ts
+.release-local/
+backups/

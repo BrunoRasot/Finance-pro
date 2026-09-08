@@ -9,6 +9,7 @@ import {
   CATEGORY_TYPES,
   type NewTransaction,
   type TransactionQuery,
+  type TransactionChanges,
 } from '../domain/transaction';
 @Injectable()
 export class TransactionsService {
@@ -40,6 +41,36 @@ export class TransactionsService {
       limit: query.limit,
       offset: query.offset,
     };
+  }
+  private assertCategory(data: TransactionChanges) {
+    if (
+      CATEGORY_TYPES[data.category] !== 'BOTH' &&
+      CATEGORY_TYPES[data.category] !== data.type
+    )
+      throw new BadRequestException('Category does not match transaction type');
+  }
+  async update(
+    ownerId: string,
+    accountId: string,
+    transactionId: string,
+    data: TransactionChanges,
+  ) {
+    this.assertCategory(data);
+    await this.assertAccount(ownerId, accountId);
+    const result = await this.repository.update(
+      ownerId,
+      accountId,
+      transactionId,
+      data,
+    );
+    if (!result) throw new NotFoundException('Transaction not found');
+    return result;
+  }
+  async delete(ownerId: string, accountId: string, transactionId: string) {
+    await this.assertAccount(ownerId, accountId);
+    if (!(await this.repository.delete(ownerId, accountId, transactionId)))
+      throw new NotFoundException('Transaction not found');
+    return { deleted: true };
   }
   async balance(ownerId: string, accountId: string) {
     const result = await this.repository.balance(ownerId, accountId);

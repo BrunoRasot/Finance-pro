@@ -12,6 +12,7 @@ export const newAccountSchema = z.object({
   currency: z.enum(['PEN', 'USD']),
   openingBalance: z.string().regex(/^(0|[1-9]\d{0,15})(\.\d{1,2})?$/),
 });
+export const accountChangesSchema = newAccountSchema.omit({ currency: true });
 export function safeDestination(value: string | null) {
   return value === '/actualizar-contrasena' ? value : '/cuentas';
 }

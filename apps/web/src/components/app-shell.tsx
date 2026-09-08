@@ -2,13 +2,15 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
-  ArrowUpRight,
+  ArrowLeftRight,
   ChartNoAxesCombined,
   ChevronRight,
   CircleHelp,
+  Download,
+  Gauge,
+  Target,
   LayoutGrid,
   LockKeyhole,
-  Plus,
   Wallet,
 } from 'lucide-react';
 import { Brand } from './brand';
@@ -17,18 +19,30 @@ import { ThemeSelect } from './theme-provider';
 const links = [
   { href: '/resumen', label: 'Resumen mensual', icon: ChartNoAxesCombined },
   { href: '/cuentas', label: 'Mis cuentas', icon: Wallet },
+  { href: '/transferencias', label: 'Transferencias', icon: ArrowLeftRight },
+  { href: '/presupuestos', label: 'Presupuestos', icon: Gauge },
+  { href: '/metas', label: 'Metas de ahorro', icon: Target },
+  { href: '/exportar', label: 'Exportar datos', icon: Download },
 ];
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const detail = pathname.startsWith('/cuentas/');
   const title = pathname.startsWith('/resumen')
     ? 'Resumen mensual'
-    : detail
-      ? 'Movimientos'
-      : 'Mis cuentas';
+    : pathname.startsWith('/transferencias')
+      ? 'Transferencias'
+      : pathname.startsWith('/presupuestos')
+        ? 'Presupuestos'
+        : pathname.startsWith('/metas')
+          ? 'Metas de ahorro'
+          : pathname.startsWith('/exportar')
+            ? 'Exportar datos'
+            : detail
+              ? 'Movimientos'
+              : 'Mis cuentas';
   return (
     <div
-      className={`workspace app-shell${pathname === '/cuentas' ? ' accounts-shell' : pathname === '/resumen' ? ' summary-shell' : ''}`}
+      className={`workspace app-shell${pathname === '/cuentas' ? ' accounts-shell' : pathname === '/resumen' ? ' summary-shell' : pathname === '/exportar' ? ' exports-shell' : detail ? ' detail-shell' : ''}`}
     >
       <a className="skip-link" href="#main-content">
         Saltar al contenido
@@ -77,9 +91,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             Registrar tus movimientos es el comienzo de unas finanzas más
             claras.
           </p>
-          <Link href="/cuentas">
-            Organizar mis cuentas <ArrowUpRight size={15} />
-          </Link>
         </div>
         <div className="sidebar-bottom">
           <LockKeyhole size={14} />
@@ -102,10 +113,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </div>
           <div className="header-actions">
             <ThemeSelect />
-            <Link href="/cuentas#nueva-cuenta" className="header-create">
-              <Plus size={16} />
-              <span>Nueva cuenta</span>
-            </Link>
             <LogoutButton />
           </div>
         </header>

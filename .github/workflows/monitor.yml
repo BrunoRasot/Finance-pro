@@ -1,0 +1,24 @@
+name: Production health
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '7,22,37,52 * * * *'
+permissions:
+  contents: read
+concurrency:
+  group: production-health
+  cancel-in-progress: false
+jobs:
+  health:
+    if: vars.PRODUCTION_MONITOR_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: node scripts/health-check.mjs
+        env:
+          MONITOR_API_BASE_URL: ${{ vars.MONITOR_API_BASE_URL }}
+          MONITOR_WEB_ORIGIN: ${{ vars.MONITOR_WEB_ORIGIN }}

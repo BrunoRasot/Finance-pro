@@ -27,10 +27,13 @@ model Account {
   currency       Currency
   openingBalance Decimal       @map("opening_balance") @db.Decimal(18, 2)
   createdAt      DateTime      @default(now()) @map("created_at") @db.Timestamptz(3)
+  archivedAt     DateTime?     @map("archived_at") @db.Timestamptz(3)
   transactions   Transaction[]
+  outgoingTransfers Transfer[] @relation("TransferFromAccount")
+  incomingTransfers Transfer[] @relation("TransferToAccount")
 
   @@unique([id, ownerId])
-  @@index([ownerId, createdAt, id])
+  @@index([ownerId, archivedAt, createdAt, id])
   @@map("accounts")
 }
 
@@ -42,6 +45,17 @@ enum TransactionType {
 enum TransactionCategory {
   SALARY
   FREELANCE
+  FOOD
+  TRANSPORT
+  HOUSING
+  HEALTH
+  EDUCATION
+  ENTERTAINMENT
+  OTHER
+  TRANSFER
+}
+
+enum BudgetCategory {
   FOOD
   TRANSPORT
   HOUSING
@@ -63,8 +77,78 @@ model Transaction {
   description    String              @db.VarChar(250)
   idempotencyKey String              @map("idempotency_key") @db.Uuid
   createdAt      DateTime            @default(now()) @map("created_at") @db.Timestamptz(3)
+  transferId     String?             @map("transfer_id") @db.Uuid
+  transfer       Transfer?           @relation(fields: [transferId], references: [id], onDelete: Restrict, onUpdate: Restrict)
 
   @@unique([ownerId, idempotencyKey])
   @@index([accountId, ownerId, date, createdAt, id])
+  @@index([transferId])
   @@map("transactions")
+}
+
+model Transfer {
+  id             String        @id @default(uuid()) @db.Uuid
+  ownerId        String        @map("owner_id") @db.Uuid
+  fromAccountId  String        @map("from_account_id") @db.Uuid
+  toAccountId    String        @map("to_account_id") @db.Uuid
+  fromAccount    Account       @relation("TransferFromAccount", fields: [fromAccountId, ownerId], references: [id, ownerId], onDelete: Restrict, onUpdate: Restrict)
+  toAccount      Account       @relation("TransferToAccount", fields: [toAccountId, ownerId], references: [id, ownerId], onDelete: Restrict, onUpdate: Restrict)
+  amount         Decimal       @db.Decimal(18, 2)
+  date           DateTime      @db.Date
+  description    String        @db.VarChar(250)
+  idempotencyKey String        @map("idempotency_key") @db.Uuid
+  createdAt      DateTime      @default(now()) @map("created_at") @db.Timestamptz(3)
+  transactions   Transaction[]
+
+  @@unique([ownerId, idempotencyKey])
+  @@index([ownerId, date, createdAt, id])
+  @@map("transfers")
+}
+
+model Budget {
+  id        String         @id @default(uuid()) @db.Uuid
+  ownerId   String         @map("owner_id") @db.Uuid
+  month     DateTime       @db.Date
+  currency  Currency
+  category  BudgetCategory
+  amount    Decimal        @db.Decimal(18, 2)
+  createdAt DateTime       @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime       @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  @@unique([ownerId, month, currency, category])
+  @@index([ownerId, month, currency])
+  @@map("budgets")
+}
+
+model SavingsGoal {
+  id           String             @id @default(uuid()) @db.Uuid
+  ownerId      String             @map("owner_id") @db.Uuid
+  name         String             @db.VarChar(100)
+  currency     Currency
+  targetAmount Decimal            @map("target_amount") @db.Decimal(18, 2)
+  deadline     DateTime?          @db.Date
+  archivedAt   DateTime?          @map("archived_at") @db.Timestamptz(3)
+  createdAt    DateTime           @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt    DateTime           @updatedAt @map("updated_at") @db.Timestamptz(3)
+  contributions GoalContribution[]
+
+  @@unique([id, ownerId])
+  @@index([ownerId, archivedAt, createdAt, id])
+  @@map("savings_goals")
+}
+
+model GoalContribution {
+  id             String      @id @default(uuid()) @db.Uuid
+  ownerId        String      @map("owner_id") @db.Uuid
+  goalId         String      @map("goal_id") @db.Uuid
+  goal           SavingsGoal @relation(fields: [goalId, ownerId], references: [id, ownerId], onDelete: Restrict, onUpdate: Restrict)
+  amount         Decimal     @db.Decimal(18, 2)
+  date           DateTime    @db.Date
+  note           String      @db.VarChar(250)
+  idempotencyKey String      @map("idempotency_key") @db.Uuid
+  createdAt      DateTime    @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  @@unique([ownerId, idempotencyKey])
+  @@index([goalId, ownerId, date, createdAt, id])
+  @@map("goal_contributions")
 }
