@@ -2,7 +2,7 @@
 
 Estado: candidata para validación, sin lanzamiento público. Fecha de revisión: 2026-09-08.
 
-El propietario eligió **Render + Neon**, inicialmente gratuitos y más adelante de pago. La configuración y el traslado pendiente están en [render-neon.md](render-neon.md). Todavía no se han creado esas cuentas; Supabase permanece como autenticación y como origen de los datos hasta verificar el traslado. La guía de servidor Linux de este documento queda como alternativa.
+El propietario eligió **Render + Neon**, inicialmente gratuitos y más adelante de pago. El 2026-09-08 se desplegaron web y API en Render, se trasladaron los datos financieros a Neon y se verificaron las siete tablas contra el respaldo autorizado. Supabase permanece como autenticación. La configuración operativa está en [render-neon.md](render-neon.md); la guía de servidor Linux de este documento queda como alternativa.
 
 ## Evidencia y condiciones de salida
 

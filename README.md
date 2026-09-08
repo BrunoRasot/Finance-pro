@@ -4,7 +4,7 @@ Aplicación personal de finanzas para web y móvil, con intención de publicarse
 
 ## Estado actual
 
-Despliegue elegido: **Render para web/API y Neon para PostgreSQL**, comenzando en planes gratuitos. Supabase se conserva para autenticación. Ver [configuración y pasos pendientes](docs/render-neon.md); aún no se han creado ni conectado las cuentas de esos proveedores.
+Despliegue activo desde el 2026-09-08: **Render para web/API y Neon para PostgreSQL**, en planes gratuitos. Supabase se conserva para autenticación. La web está en <https://finance-pro-web-o6ce.onrender.com> y la API en <https://finance-pro-api-wyv2.onrender.com/api/v1>. Ver [configuración y operación](docs/render-neon.md).
 
 Versión candidata **1.0.0-rc.1**. El cierre técnico y los pasos externos pendientes están registrados en la [guía de lanzamiento](docs/release-v1.md). No es todavía un despliegue público ni una publicación en tiendas.
 
