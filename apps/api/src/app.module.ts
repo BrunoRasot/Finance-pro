@@ -16,6 +16,7 @@ import { ExportsModule } from './modules/exports/exports.module';
 import { TokenVerifier } from './common/security/token-verifier';
 import { SupabaseTokenVerifier } from './common/security/supabase-token-verifier';
 import { ProfileModule } from './modules/profile/profile.module';
+import { rateLimitTracker } from './common/security/rate-limit-tracker';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { ProfileModule } from './modules/profile/profile.module';
         {
           ttl: config.get('RATE_LIMIT_TTL_MS', { infer: true }),
           limit: config.get('RATE_LIMIT_MAX', { infer: true }),
+          getTracker: (request) => Promise.resolve(rateLimitTracker(request)),
         },
       ],
     }),
@@ -46,8 +48,8 @@ import { ProfileModule } from './modules/profile/profile.module';
   ],
   providers: [
     { provide: TokenVerifier, useClass: SupabaseTokenVerifier },
-    { provide: APP_GUARD, useClass: ThrottlerGuard },
     { provide: APP_GUARD, useClass: AccessGuard },
+    { provide: APP_GUARD, useClass: ThrottlerGuard },
     { provide: APP_FILTER, useClass: ApiExceptionFilter },
   ],
 })
