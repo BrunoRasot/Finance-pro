@@ -1,0 +1,54 @@
+# Render Blueprint: two free web services, with PostgreSQL hosted on Neon.
+# Enter real runtime values in Render, never in this file.
+services:
+  - type: web
+    name: finance-pro-api
+    runtime: docker
+    plan: free
+    branch: codex/release-v1-rc1
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    # The shared Dockerfile ends in the web stage; use the API entry point.
+    dockerCommand: node /app/apps/api/dist/main.js
+    autoDeployTrigger: off
+    # Liveness avoids continuously waking Neon with database probes.
+    # Check /health/ready manually after deployment and migration.
+    healthCheckPath: /api/v1/health/live
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: HOST
+        value: 0.0.0.0
+      - key: PORT
+        value: '10000'
+      - key: REQUEST_LOG_ENABLED
+        value: 'true'
+      - key: DATABASE_URL
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: CORS_ORIGINS
+        sync: false
+  - type: web
+    name: finance-pro-web
+    runtime: docker
+    plan: free
+    branch: codex/release-v1-rc1
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    dockerCommand: node /app/apps/web/node_modules/next/dist/bin/next start --hostname 0.0.0.0 --port 10000
+    autoDeployTrigger: off
+    healthCheckPath: /iniciar-sesion
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: '10000'
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_PUBLISHABLE_KEY
+        sync: false
+      - key: API_BASE_URL
+        sync: false
+      - key: APP_ORIGIN
+        sync: false

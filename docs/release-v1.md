@@ -2,6 +2,8 @@
 
 Estado: candidata para validación, sin lanzamiento público. Fecha de revisión: 2026-09-08.
 
+El propietario eligió **Render + Neon**, inicialmente gratuitos y más adelante de pago. La configuración y el traslado pendiente están en [render-neon.md](render-neon.md). Todavía no se han creado esas cuentas; Supabase permanece como autenticación y como origen de los datos hasta verificar el traslado. La guía de servidor Linux de este documento queda como alternativa.
+
 ## Evidencia y condiciones de salida
 
 El 2026-09-08 se verificó el arranque de las imágenes Docker de web y API sin root, las ocho migraciones sobre PostgreSQL del contenedor y los tres controles del monitor con respuesta 200. En navegador se revisaron la pantalla de acceso, la navegación a recuperación y la redirección de `/cuentas` sin sesión. Esta prueba usó configuración pública ficticia y no valida el envío de correos ni el acceso autenticado de producción.

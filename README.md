@@ -4,6 +4,8 @@ Aplicación personal de finanzas para web y móvil, con intención de publicarse
 
 ## Estado actual
 
+Despliegue elegido: **Render para web/API y Neon para PostgreSQL**, comenzando en planes gratuitos. Supabase se conserva para autenticación. Ver [configuración y pasos pendientes](docs/render-neon.md); aún no se han creado ni conectado las cuentas de esos proveedores.
+
 Versión candidata **1.0.0-rc.1**. El cierre técnico y los pasos externos pendientes están registrados en la [guía de lanzamiento](docs/release-v1.md). No es todavía un despliegue público ni una publicación en tiendas.
 
 El backend en `apps/api` incluye NestJS, PostgreSQL con Prisma, verificación JWT de Supabase, cuentas, ingresos/gastos, transferencias atómicas, presupuestos mensuales, metas de ahorro con aportes, exportación de datos, historial filtrable y saldo calculado con aislamiento por usuario. La web en `apps/web` incluye Next.js y las vistas privadas de gestión. La aplicación Expo en `apps/mobile` comparte autenticación, API y datos para ofrecer resumen, administración de cuentas y movimientos, transferencias, presupuestos, metas, exportaciones y temas claro/oscuro en Android e iOS. Ver [contrato de movimientos](docs/transactions-api.md), [transferencias](docs/transfers-api.md), [presupuestos](docs/budgets-api.md), [metas de ahorro](docs/goals-api.md), [exportaciones](docs/exports-api.md) y [guía móvil](apps/mobile/README.md).
