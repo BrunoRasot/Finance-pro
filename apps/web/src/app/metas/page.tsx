@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Flag, Target } from 'lucide-react';
+import { Target } from 'lucide-react';
 import { AppShell } from '@/components/app-shell';
 import { GoalActions } from '@/features/goals/goal-actions';
 import { GoalForm } from '@/features/goals/goal-form';
@@ -71,53 +71,81 @@ export default async function GoalsPage({
                   </p>
                 </div>
               ) : (
-                items.map((goal) => {
-                  const completed = goal.progressPercent >= 100;
-                  return (
-                    <article className="goal-card" key={goal.id}>
-                      <div className="goal-card-heading">
-                        <span className="goal-icon">
-                          <Flag size={19} />
-                        </span>
-                        <div>
-                          <h3>{goal.name}</h3>
-                          <small>
-                            {goal.deadline
-                              ? `Objetivo: ${new Intl.DateTimeFormat('es-PE', { dateStyle: 'medium', timeZone: 'UTC' }).format(new Date(`${goal.deadline}T00:00:00Z`))}`
-                              : 'Sin fecha límite'}
-                          </small>
-                        </div>
-                        <span className="currency-tag">{goal.currency}</span>
-                      </div>
-                      <div className="goal-amount">
-                        <strong>
-                          {formatAmount(goal.savedAmount, goal.currency)}
-                        </strong>
-                        <span>
-                          de {formatAmount(goal.targetAmount, goal.currency)}
-                        </span>
-                      </div>
-                      <div
-                        className="goal-progress"
-                        aria-label={`${goal.progressPercent}% completado`}
-                      >
-                        <span
-                          style={{
-                            width: `${Math.min(100, goal.progressPercent)}%`,
-                          }}
-                        />
-                      </div>
-                      <div className="goal-card-footer">
-                        <span className={completed ? 'goal-complete' : ''}>
-                          {completed
-                            ? 'Meta alcanzada'
-                            : `${goal.progressPercent.toLocaleString('es-PE', { maximumFractionDigits: 1 })}% completado`}
-                        </span>
-                        <GoalActions goal={goal} />
-                      </div>
-                    </article>
-                  );
-                })
+                <div className="goal-table-wrap">
+                  <table className="goal-table">
+                    <thead>
+                      <tr>
+                        <th>Meta</th>
+                        <th>Ahorrado</th>
+                        <th>Objetivo</th>
+                        <th>Progreso</th>
+                        <th>Fecha objetivo</th>
+                        <th className="goal-actions-heading">Acciones</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {items.map((goal) => {
+                        const completed = goal.progressPercent >= 100;
+                        return (
+                          <tr key={goal.id}>
+                            <td>
+                              <strong className="goal-table-name">
+                                {goal.name}
+                              </strong>
+                              <span className="currency-tag">
+                                {goal.currency}
+                              </span>
+                            </td>
+                            <td className="goal-money">
+                              {formatAmount(goal.savedAmount, goal.currency)}
+                            </td>
+                            <td className="goal-money">
+                              {formatAmount(goal.targetAmount, goal.currency)}
+                            </td>
+                            <td>
+                              <div className="goal-progress-cell">
+                                <strong
+                                  className={completed ? 'goal-complete' : ''}
+                                >
+                                  {goal.progressPercent.toLocaleString(
+                                    'es-PE',
+                                    {
+                                      maximumFractionDigits: 1,
+                                    },
+                                  )}
+                                  %
+                                </strong>
+                                <div
+                                  className="goal-progress"
+                                  aria-label={`${goal.progressPercent}% completado`}
+                                >
+                                  <span
+                                    style={{
+                                      width: `${Math.min(100, goal.progressPercent)}%`,
+                                    }}
+                                  />
+                                </div>
+                              </div>
+                            </td>
+                            <td className="goal-date">
+                              {goal.deadline
+                                ? new Intl.DateTimeFormat('es-PE', {
+                                    dateStyle: 'medium',
+                                    timeZone: 'UTC',
+                                  }).format(
+                                    new Date(`${goal.deadline}T00:00:00Z`),
+                                  )
+                                : 'Sin fecha'}
+                            </td>
+                            <td className="goal-actions-cell">
+                              <GoalActions goal={goal} />
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
               )}
             </div>
           </section>

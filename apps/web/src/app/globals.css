@@ -1944,10 +1944,6 @@ select {
 }
 .goals-list {
   min-height: 0;
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  align-content: start;
-  gap: 16px;
   margin-top: 20px;
   overflow-y: auto;
   padding-right: 5px;
@@ -2043,6 +2039,115 @@ select {
   padding: 8px 11px;
   font-size: 10px;
 }
+.goal-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+.goal-table {
+  width: 100%;
+  min-width: 860px;
+  border-collapse: collapse;
+  text-align: left;
+}
+.goal-table th {
+  padding: 13px 15px;
+  background: var(--surface-muted);
+  color: var(--muted);
+  font-size: 9px;
+  font-weight: 750;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.goal-table td {
+  padding: 16px 15px;
+  border-top: 1px solid var(--line);
+  color: var(--ink);
+  font-size: 12px;
+  vertical-align: middle;
+}
+.goal-table tbody tr {
+  transition: background 160ms ease;
+}
+.goal-table tbody tr:hover {
+  background: var(--surface-muted);
+}
+.goal-table-name {
+  display: inline-block;
+  max-width: 180px;
+  margin-right: 8px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+.goal-money {
+  font-weight: 700;
+  white-space: nowrap;
+}
+.goal-progress-cell {
+  width: 130px;
+}
+.goal-progress-cell strong {
+  display: block;
+  margin-bottom: 7px;
+  font-size: 11px;
+}
+.goal-date {
+  color: var(--muted) !important;
+  white-space: nowrap;
+}
+.goal-actions-heading,
+.goal-actions-cell {
+  text-align: right !important;
+}
+.goal-actions-cell .goal-actions {
+  justify-content: flex-end;
+}
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  overflow-y: auto;
+  background: rgb(5 11 9 / 72%);
+  backdrop-filter: blur(5px);
+}
+.modal-card {
+  position: relative;
+  width: min(100%, 470px);
+  max-height: calc(100svh - 40px);
+  padding: 28px;
+  overflow-y: auto;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--surface);
+  box-shadow: 0 24px 80px rgb(0 0 0 / 35%);
+  text-align: left;
+}
+.modal-card h2 {
+  margin: 0 44px 22px 0;
+  color: var(--ink);
+  font-size: 22px;
+}
+.modal-close {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--surface-muted);
+  color: var(--ink);
+  cursor: pointer;
+}
 .goal-create-panel {
   align-self: stretch;
   max-width: none;
@@ -2077,11 +2182,10 @@ select {
     padding: 20px;
   }
   .goals-list {
-    grid-template-columns: 1fr;
+    padding-bottom: 8px;
   }
-  .goal-card-footer {
-    align-items: flex-start;
-    flex-direction: column;
+  .modal-card {
+    padding: 22px;
   }
 }
 
