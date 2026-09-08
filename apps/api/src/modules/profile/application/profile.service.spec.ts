@@ -42,7 +42,32 @@ describe('ProfileService', () => {
     }
     expect(global.fetch).toHaveBeenCalledWith(
       `https://project.supabase.co/auth/v1/admin/users/${ownerId}`,
-      expect.objectContaining({ method: 'DELETE' }),
+      expect.objectContaining({
+        method: 'DELETE',
+        headers: { apikey: 'service-role-key-with-safe-length' },
+      }),
+    );
+  });
+
+  it('sends a legacy JWT service-role key as a bearer token', async () => {
+    global.fetch = jest.fn().mockResolvedValue({ ok: true, status: 200 });
+    const legacyKey = `eyJ${'a'.repeat(24)}`;
+    const config = new ConfigService<Environment, true>({
+      SUPABASE_URL: 'https://project.supabase.co',
+      SUPABASE_SERVICE_ROLE_KEY: legacyKey,
+    });
+    const service = new ProfileService(database, config);
+
+    await service.delete(ownerId);
+
+    expect(global.fetch).toHaveBeenCalledWith(
+      `https://project.supabase.co/auth/v1/admin/users/${ownerId}`,
+      expect.objectContaining({
+        headers: {
+          apikey: legacyKey,
+          Authorization: `Bearer ${legacyKey}`,
+        },
+      }),
     );
   });
 

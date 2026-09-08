@@ -60,7 +60,11 @@ const environmentSchema = z
         });
     }
     if (env.NODE_ENV === 'production') {
-      for (const key of ['DATABASE_URL', 'SUPABASE_URL'] as const) {
+      for (const key of [
+        'DATABASE_URL',
+        'SUPABASE_URL',
+        'SUPABASE_SERVICE_ROLE_KEY',
+      ] as const) {
         if (!env[key])
           context.addIssue({
             code: 'custom',

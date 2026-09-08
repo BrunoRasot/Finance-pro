@@ -30,14 +30,18 @@ export class ProfileService {
       );
     }
 
+    const headers: Record<string, string> = { apikey: serviceKey };
+    // Legacy service_role keys are JWTs and Auth expects them as Bearer tokens.
+    // Modern sb_secret_ keys are opaque API keys and must not be parsed as JWTs.
+    if (serviceKey.startsWith('eyJ')) {
+      headers.Authorization = `Bearer ${serviceKey}`;
+    }
+
     let response: Response;
     try {
       response = await fetch(`${supabaseUrl}/auth/v1/admin/users/${ownerId}`, {
         method: 'DELETE',
-        headers: {
-          apikey: serviceKey,
-          Authorization: `Bearer ${serviceKey}`,
-        },
+        headers,
         signal: AbortSignal.timeout(10_000),
       });
     } catch {
