@@ -56,7 +56,14 @@ describe('Profile deletion with PostgreSQL and verified JWTs', () => {
   });
 
   beforeEach(async () => {
-    global.fetch = jest.fn().mockResolvedValue({ ok: true, status: 200 });
+    global.fetch = jest.fn(
+      async (input: string | URL | Request, init?: RequestInit) => {
+        if (init?.method === 'DELETE') {
+          return new Response(null, { status: 200 });
+        }
+        return originalFetch(input, init);
+      },
+    );
     const accountA = await database.client.account.create({
       data: {
         ownerId: userA,
