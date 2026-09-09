@@ -74,17 +74,32 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
         </label>
       )}
       {confirm && (
-        <label>
-          Confirmar contraseña
-          <input
-            name="confirmPassword"
-            type={show ? 'text' : 'password'}
-            autoComplete="new-password"
-            required
-            minLength={12}
-            maxLength={128}
-            placeholder="Vuelve a escribirla"
-          />
+        <>
+          <p className="password-requirements">
+            Usa entre 12 y 128 caracteres e incluye una mayúscula, una
+            minúscula, un número y un símbolo.
+          </p>
+          <label>
+            Confirmar contraseña
+            <input
+              name="confirmPassword"
+              type={show ? 'text' : 'password'}
+              autoComplete="new-password"
+              required
+              minLength={12}
+              maxLength={128}
+              placeholder="Vuelve a escribirla"
+            />
+          </label>
+        </>
+      )}
+      {mode === 'register' && (
+        <label className="terms-acceptance">
+          <input name="termsAccepted" type="checkbox" required />
+          <span>
+            Acepto los <Link href="/terminos">Términos de uso</Link> y la{' '}
+            <Link href="/privacidad">Política de privacidad</Link>.
+          </span>
         </label>
       )}
       {state.error && (

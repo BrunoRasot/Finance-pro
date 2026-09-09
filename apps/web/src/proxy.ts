@@ -27,8 +27,37 @@ export async function proxy(request: NextRequest) {
       },
     },
   );
-  // Refresh here; protected pages and actions independently verify the user.
-  await client.auth.getClaims();
+  const { data } = await client.auth.getClaims();
+  const signedIn = Boolean(data?.claims?.sub);
+  const path = request.nextUrl.pathname;
+  const protectedPrefixes = [
+    '/resumen',
+    '/cuentas',
+    '/transferencias',
+    '/presupuestos',
+    '/metas',
+    '/exportar',
+    '/configuracion',
+    '/actualizar-contrasena',
+  ];
+  if (
+    !signedIn &&
+    protectedPrefixes.some((prefix) => path.startsWith(prefix))
+  ) {
+    const login = request.nextUrl.clone();
+    login.pathname = '/iniciar-sesion';
+    login.search = '';
+    return NextResponse.redirect(login);
+  }
+  if (
+    signedIn &&
+    ['/iniciar-sesion', '/registro', '/recuperar-contrasena'].includes(path)
+  ) {
+    const accounts = request.nextUrl.clone();
+    accounts.pathname = '/cuentas';
+    accounts.search = '';
+    return NextResponse.redirect(accounts);
+  }
   response.headers.set('Cache-Control', 'private, no-store');
   return response;
 }

@@ -71,15 +71,22 @@ test('account maintenance keeps currency outside editable fields', () => {
     false,
   );
 });
-test('registration enforces valid email and bounded password length', () => {
+test('registration enforces valid email and a strong bounded password', () => {
   assert.equal(
     credentialsSchema.safeParse({
       email: 'person@example.com',
-      password: 'a'.repeat(12),
+      password: 'Segura#2026!!',
     }).success,
     true,
   );
-  for (const password of ['short', 'a'.repeat(129)])
+  for (const password of [
+    'short',
+    'a'.repeat(12),
+    'ONLYUPPERCASE1!',
+    'NoNumbersHere!',
+    'NoSymbols2026',
+    `A1!${'a'.repeat(126)}`,
+  ])
     assert.equal(
       credentialsSchema.safeParse({ email: 'person@example.com', password })
         .success,
@@ -88,7 +95,7 @@ test('registration enforces valid email and bounded password length', () => {
   assert.equal(
     credentialsSchema.safeParse({
       email: 'not-an-email',
-      password: 'a'.repeat(12),
+      password: 'Segura#2026!!',
     }).success,
     false,
   );

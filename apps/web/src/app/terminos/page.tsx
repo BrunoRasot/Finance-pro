@@ -34,6 +34,13 @@ export default function TermsPage() {
         Podemos restringir cuentas que incumplan estos términos o comprometan la
         seguridad de otras personas.
       </p>
+      <h2>Contacto y procedimiento</h2>
+      <p>
+        Si una cuenta se restringe, puedes solicitar una revisión escribiendo a{' '}
+        <a href="mailto:rye933864@gmail.com">rye933864@gmail.com</a>. Indica el
+        correo de la cuenta y una descripción del caso, sin enviar contraseñas
+        ni información financiera.
+      </p>
     </PublicPage>
   );
 }

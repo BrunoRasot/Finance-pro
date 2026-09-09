@@ -35,6 +35,17 @@ export function DeleteAccountForm() {
           pattern="ELIMINAR"
         />
       </label>
+      <label>
+        Confirma tu contraseña actual
+        <input
+          name="currentPassword"
+          type="password"
+          required
+          minLength={1}
+          maxLength={128}
+          autoComplete="current-password"
+        />
+      </label>
       {state.error && (
         <p className="notice error" role="alert">
           {state.error}

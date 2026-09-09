@@ -36,8 +36,9 @@ test('xcode can still load the patched UUID generator through CommonJS', () => {
 
 test('new passwords use the same length limits as the web', () => {
   assert.equal(validNewPassword('a'.repeat(11)), false);
-  assert.equal(validNewPassword('a'.repeat(12)), true);
-  assert.equal(validNewPassword('a'.repeat(128)), true);
+  assert.equal(validNewPassword('a'.repeat(12)), false);
+  assert.equal(validNewPassword('Segura#2026!!'), true);
+  assert.equal(validNewPassword(`A1!${'a'.repeat(125)}`), true);
   assert.equal(validNewPassword('a'.repeat(129)), false);
 });
 

@@ -69,7 +69,12 @@ export async function register(
   });
   if (!parsed.success)
     return {
-      error: 'Usa un correo válido y una contraseña de 12 a 128 caracteres.',
+      error:
+        'Usa un correo válido y una contraseña que cumpla todos los requisitos.',
+    };
+  if (form.get('termsAccepted') !== 'on')
+    return {
+      error: 'Debes aceptar los Términos y la Política de privacidad.',
     };
   if (form.get('password') !== form.get('confirmPassword'))
     return { error: 'Las contraseñas no coinciden.' };
@@ -78,7 +83,13 @@ export async function register(
     const client = await createSupabaseClient();
     const { data, error } = await client.auth.signUp({
       ...parsed.data,
-      options: { emailRedirectTo: `${getConfig().APP_ORIGIN}/auth/callback` },
+      options: {
+        emailRedirectTo: `${getConfig().APP_ORIGIN}/auth/callback`,
+        data: {
+          terms_accepted_at: new Date().toISOString(),
+          terms_version: '2026-09-08',
+        },
+      },
     });
     if (error)
       return {
@@ -124,7 +135,7 @@ export async function updatePassword(
   const { client } = await requireUser();
   const password = passwordSchema.safeParse(form.get('password'));
   if (!password.success)
-    return { error: 'Usa una contraseña de 12 a 128 caracteres.' };
+    return { error: 'La contraseña no cumple todos los requisitos.' };
   if (form.get('password') !== form.get('confirmPassword'))
     return { error: 'Las contraseñas no coinciden.' };
   try {

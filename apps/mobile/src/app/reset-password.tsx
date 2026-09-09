@@ -80,8 +80,8 @@ export default function ResetPasswordScreen() {
           <Text style={styles.eyebrow}>RECUPERA TU ACCESO</Text>
           <Text style={styles.title}>Crea una contraseña nueva.</Text>
           <Text style={styles.copy}>
-            Usa al menos 12 caracteres y evita reutilizar una contraseña de otro
-            servicio.
+            Usa entre 12 y 128 caracteres e incluye una mayúscula, una
+            minúscula, un número y un símbolo.
           </Text>
         </View>
         <View style={styles.form}>

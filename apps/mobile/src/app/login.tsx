@@ -26,15 +26,31 @@ export default function LoginScreen() {
   const [register, setRegister] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [error, setError] = useState<string | null>(null);
   if (!authLoading && session) return <Redirect href="/(app)" />;
   async function submit() {
     if (register && !validNewPassword(password))
-      return setError('Usa una contraseña de entre 12 y 128 caracteres.');
+      return setError(
+        'Usa entre 12 y 128 caracteres, con mayúscula, minúscula, número y símbolo.',
+      );
+    if (register && !acceptedTerms)
+      return setError(
+        'Debes aceptar los Términos y la Política de privacidad.',
+      );
     setLoading(true);
     setError(null);
     const result = register
-      ? await supabase.auth.signUp({ email: email.trim(), password })
+      ? await supabase.auth.signUp({
+          email: email.trim(),
+          password,
+          options: {
+            data: {
+              terms_accepted_at: new Date().toISOString(),
+              terms_version: '2026-09-08',
+            },
+          },
+        })
       : await supabase.auth.signInWithPassword({
           email: email.trim(),
           password,
@@ -158,7 +174,9 @@ export default function LoginScreen() {
               onChangeText={setPassword}
               secureTextEntry={!showPassword}
               autoComplete={register ? 'new-password' : 'current-password'}
-              placeholder="Mínimo 8 caracteres"
+              placeholder={
+                register ? '12+ caracteres y un símbolo' : 'Tu contraseña'
+              }
             />
             <Pressable
               accessibilityLabel={
@@ -174,12 +192,33 @@ export default function LoginScreen() {
               />
             </Pressable>
           </View>
+          {register ? (
+            <Pressable
+              accessibilityRole="checkbox"
+              accessibilityState={{ checked: acceptedTerms }}
+              onPress={() => setAcceptedTerms(!acceptedTerms)}
+              style={local.termsRow}
+            >
+              <Ionicons
+                name={acceptedTerms ? 'checkbox' : 'square-outline'}
+                size={21}
+                color={acceptedTerms ? colors.primary : colors.muted}
+              />
+              <Text style={local.termsCopy}>
+                Acepto los Términos de uso y la Política de privacidad.
+              </Text>
+            </Pressable>
+          ) : null}
           <ErrorNotice message={error} />
           <Button
             title={register ? 'Crear cuenta' : 'Iniciar sesión'}
             onPress={submit}
             loading={loading}
-            disabled={!email || password.length < 8}
+            disabled={
+              !email ||
+              password.length < (register ? 12 : 1) ||
+              (register && !acceptedTerms)
+            }
           />
           {!register ? (
             <Pressable onPress={() => void recover()}>
@@ -193,6 +232,7 @@ export default function LoginScreen() {
             <Pressable
               onPress={() => {
                 setRegister(!register);
+                setAcceptedTerms(false);
                 setError(null);
               }}
             >
@@ -310,6 +350,17 @@ const makeStyles = (colors: Palette) =>
       textAlign: 'right',
       fontSize: 12,
       fontWeight: '800',
+    },
+    termsRow: {
+      flexDirection: 'row',
+      alignItems: 'flex-start',
+      gap: 9,
+    },
+    termsCopy: {
+      color: colors.muted,
+      flex: 1,
+      fontSize: 11,
+      lineHeight: 17,
     },
     switchRow: {
       flexDirection: 'row',

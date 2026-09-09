@@ -41,6 +41,13 @@ export default function PrivacyPage() {
         financiera asociada. Si no puedes iniciar sesión, utiliza la página
         pública de eliminación de cuenta.
       </p>
+      <h2>Responsable y contacto</h2>
+      <p>
+        Bruno Rasot es responsable de Finance Pro. Para consultar, corregir,
+        exportar o eliminar tus datos, escribe a{' '}
+        <a href="mailto:rye933864@gmail.com">rye933864@gmail.com</a>. Las
+        solicitudes se revisan y responden por correo.
+      </p>
     </PublicPage>
   );
 }
