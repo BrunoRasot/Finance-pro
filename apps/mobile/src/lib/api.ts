@@ -22,19 +22,33 @@ export async function apiResponse(
   const { data } = await supabase.auth.getSession();
   if (!data.session)
     throw new ApiError(401, 'Tu sesión terminó. Vuelve a ingresar.');
-  const controller = new AbortController();
-  // Allow the free Render API enough time to wake after an idle period.
-  const timeout = setTimeout(() => controller.abort(), 60_000);
+  const request = async () => {
+    const controller = new AbortController();
+    // A free Render instance can occasionally need more than a minute to wake.
+    const timeout = setTimeout(() => controller.abort(), 120_000);
+    try {
+      return await fetch(`${config.apiBaseUrl}${path}`, {
+        ...init,
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${data.session.access_token}`,
+          ...init?.headers,
+        },
+        signal: controller.signal,
+      });
+    } finally {
+      clearTimeout(timeout);
+    }
+  };
   try {
-    const response = await fetch(`${config.apiBaseUrl}${path}`, {
-      ...init,
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${data.session.access_token}`,
-        ...init?.headers,
-      },
-      signal: controller.signal,
-    });
+    let response: Response;
+    try {
+      response = await request();
+    } catch (error) {
+      const method = init?.method?.toUpperCase() ?? 'GET';
+      if (!['GET', 'HEAD'].includes(method)) throw error;
+      response = await request();
+    }
     if (response.status === 401) {
       await supabase.auth.signOut();
       throw new ApiError(401, 'Tu sesión terminó. Vuelve a ingresar.');
@@ -57,8 +71,6 @@ export async function apiResponse(
       0,
       'No pudimos actualizar tus datos. Revisa tu conexión e inténtalo nuevamente.',
     );
-  } finally {
-    clearTimeout(timeout);
   }
 }
 export function retryKey() {
