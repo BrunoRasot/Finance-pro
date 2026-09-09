@@ -23,7 +23,8 @@ export async function apiResponse(
   if (!data.session)
     throw new ApiError(401, 'Tu sesión terminó. Vuelve a ingresar.');
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 10_000);
+  // Allow the free Render API enough time to wake after an idle period.
+  const timeout = setTimeout(() => controller.abort(), 60_000);
   try {
     const response = await fetch(`${config.apiBaseUrl}${path}`, {
       ...init,

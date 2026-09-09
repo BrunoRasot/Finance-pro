@@ -13,7 +13,8 @@ export async function apiRequest(path: string, init?: RequestInit) {
       Authorization: `Bearer ${data.session.access_token}`,
     },
     cache: 'no-store',
-    signal: AbortSignal.timeout(8000),
+    // Render's free instances can take close to a minute to wake after idle.
+    signal: AbortSignal.timeout(60_000),
   });
   if (response.status === 401) redirect('/iniciar-sesion');
   return response;
