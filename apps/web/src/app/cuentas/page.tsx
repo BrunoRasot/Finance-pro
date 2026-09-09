@@ -16,6 +16,7 @@ import { AppShell } from '@/components/app-shell';
 
 import { AccountForm } from '@/features/accounts/account-form';
 import { AccountActions } from '@/features/accounts/account-actions';
+import { RetryButton } from '@/components/retry-button';
 const types = { BANK: 'Banco', CASH: 'Efectivo', WALLET: 'Billetera digital' };
 export default async function AccountsPage({
   searchParams,
@@ -89,9 +90,7 @@ export default async function AccountsPage({
                     No pudimos actualizar la información. Espera un momento y
                     vuelve a intentarlo.
                   </p>
-                  <Link className="button subtle" href="/cuentas">
-                    Volver a intentar
-                  </Link>
+                  <RetryButton />
                 </div>
               ) : items.length === 0 ? (
                 <div className="empty-state">

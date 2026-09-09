@@ -41,12 +41,17 @@ export async function apiResponse(
     }
   };
   try {
+    const method = init?.method?.toUpperCase() ?? 'GET';
+    const safeToRetry = ['GET', 'HEAD'].includes(method);
     let response: Response;
     try {
       response = await request();
     } catch (error) {
-      const method = init?.method?.toUpperCase() ?? 'GET';
-      if (!['GET', 'HEAD'].includes(method)) throw error;
+      if (!safeToRetry) throw error;
+      response = await request();
+    }
+    if (safeToRetry && [502, 503, 504].includes(response.status)) {
+      await new Promise((resolve) => setTimeout(resolve, 2_000));
       response = await request();
     }
     if (response.status === 401) {

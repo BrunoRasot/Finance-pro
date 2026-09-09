@@ -13,6 +13,7 @@ import {
   type MonthlyReport,
 } from '@/features/reports/model';
 import { AppShell } from '@/components/app-shell';
+import { RetryButton } from '@/components/retry-button';
 
 export const metadata = { title: 'Resumen mensual' };
 export default async function SummaryPage({
@@ -74,9 +75,7 @@ export default async function SummaryPage({
           <div className="empty-state">
             <h2>No pudimos cargar el resumen</h2>
             <p>Comprueba tu conexión e inténtalo de nuevo.</p>
-            <Link href={`/resumen?month=${selected}`} className="button subtle">
-              Reintentar
-            </Link>
+            <RetryButton label="Reintentar" />
           </div>
         ) : (
           <>
