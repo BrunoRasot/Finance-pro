@@ -1,6 +1,6 @@
 {
   "name": "@finance-pro/api",
-  "version": "1.0.0-rc.1",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
     "test:recovery": "node scripts/recovery-drill.mjs",

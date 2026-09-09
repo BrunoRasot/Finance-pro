@@ -27,7 +27,7 @@ No hace falta comprar dominio para empezar: Render ofrece direcciones HTTPS `*.o
 3. Los datos del respaldo autorizado del 7 de septiembre se importaron en una base Neon vacía. Se conservaron `_prisma_migrations` y los UUID de propietario. Las cuentas, movimientos, transferencias, presupuestos, metas, aportes y migraciones coincidieron exactamente por cantidad y SHA-256. No usar `migrate reset`.
 4. Si se opta expresamente por una base nueva **sin datos**, cargar la conexión directa en `DATABASE_URL` de una terminal temporal y ejecutar `pnpm db:migrate`. Esta alternativa no traslada el historial existente y no es la opción predeterminada.
 5. Neon tiene el rol agrupador `finance_app` y un login dedicado limitado para la API. Render guarda solamente su conexión pooled en `DATABASE_URL`; la cuenta administrativa permanece fuera de Render.
-6. La rama `codex/release-v1-rc1` está publicada en GitHub. La etiqueta `v1.0.0-rc.1` conserva la candidata validada; la configuración Render/Neon está en el commit posterior `35d08af`.
+6. La rama oficial es `main` y la versión publicada está identificada con la etiqueta `v1.0.0`.
 7. Render usa `render.yaml` mediante el Blueprint `finance-pro`, con dos servicios Free, puerto 10000 y despliegues automáticos apagados. No incluye Render Postgres, cron de pago ni discos.
 8. CORS, las URLs públicas y los callbacks de Supabase usan las direcciones reales asignadas por Render.
 

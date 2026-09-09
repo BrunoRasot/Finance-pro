@@ -1,12 +1,12 @@
 # Finance Pro
 
-Aplicación personal de finanzas para web y móvil, con intención de publicarse más adelante.
+Aplicación de finanzas personales para web y móvil.
 
 ## Estado actual
 
 Despliegue activo desde el 2026-09-08: **Render para web/API y Neon para PostgreSQL**, en planes gratuitos. Supabase se conserva para autenticación. La web está en <https://finance-pro-web-o6ce.onrender.com> y la API en <https://finance-pro-api-wyv2.onrender.com/api/v1>. Ver [configuración y operación](docs/render-neon.md).
 
-Versión candidata **1.0.0-rc.1**. El cierre técnico y los pasos externos pendientes están registrados en la [guía de lanzamiento](docs/release-v1.md). No es todavía un despliegue público ni una publicación en tiendas.
+Versión oficial **1.0.0**, publicada en web mediante Render. La aplicación Android se distribuye actualmente mediante una compilación interna de Expo; la publicación en tiendas queda como una etapa posterior. La operación del sistema está documentada en la [guía de lanzamiento](docs/release-v1.md).
 
 El backend en `apps/api` incluye NestJS, PostgreSQL con Prisma, verificación JWT de Supabase, cuentas, ingresos/gastos, transferencias atómicas, presupuestos mensuales, metas de ahorro con aportes, exportación de datos, historial filtrable y saldo calculado con aislamiento por usuario. La web en `apps/web` incluye Next.js y las vistas privadas de gestión. La aplicación Expo en `apps/mobile` comparte autenticación, API y datos para ofrecer resumen, administración de cuentas y movimientos, transferencias, presupuestos, metas, exportaciones y temas claro/oscuro en Android e iOS. Ver [contrato de movimientos](docs/transactions-api.md), [transferencias](docs/transfers-api.md), [presupuestos](docs/budgets-api.md), [metas de ahorro](docs/goals-api.md), [exportaciones](docs/exports-api.md) y [guía móvil](apps/mobile/README.md).
 
@@ -96,4 +96,4 @@ El flujo de GitHub Actions ejecutará formato, lint, tipos, pruebas y compilaci�
 
 ## Próxima etapa
 
-El recorrido de registro, acceso, cuentas, ingresos, gastos, historial y saldo fue validado manualmente por el propietario del proyecto. La candidata incluye el resumen mensual, transferencias, presupuestos, metas, exportación y aplicación móvil. `pnpm verify:release` ejecuta formato, lint, tipos, pruebas, simulacro de recuperación y compilaciones; requiere una base PostgreSQL de pruebas migrada, Node 24, pnpm 11 y herramientas PostgreSQL 17. El despliegue y la prueba del instalador móvil se completan siguiendo [release-v1.md](docs/release-v1.md). Nunca versionar credenciales, respaldos ni archivos `.env` reales.
+La versión 1.0.0 incluye registro, acceso, cuentas, ingresos, gastos, historial, saldo, resumen mensual, transferencias, presupuestos, metas, exportación y aplicación móvil. `pnpm verify:release` ejecuta formato, lint, tipos, pruebas, simulacro de recuperación y compilaciones; requiere una base PostgreSQL de pruebas migrada, Node 24, pnpm 11 y herramientas PostgreSQL 17. La operación y validación se realizan siguiendo [release-v1.md](docs/release-v1.md). Nunca versionar credenciales, respaldos ni archivos `.env` reales.

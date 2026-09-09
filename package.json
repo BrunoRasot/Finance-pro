@@ -1,6 +1,6 @@
 {
   "name": "finance-pro",
-  "version": "1.0.0-rc.1",
+  "version": "1.0.0",
   "private": true,
   "description": "Aplicación web y móvil para gestionar finanzas personales.",
   "packageManager": "pnpm@11.22.0",

@@ -1,6 +1,6 @@
-# Finance Pro 1.0.0-rc.1
+# Finance Pro 1.0.0
 
-Estado: candidata para validación, sin lanzamiento público. Fecha de revisión: 2026-09-08.
+Estado: versión oficial publicada en web. Fecha de lanzamiento: 2026-09-09.
 
 El propietario eligió **Render + Neon**, inicialmente gratuitos y más adelante de pago. El 2026-09-08 se desplegaron web y API en Render, se trasladaron los datos financieros a Neon y se verificaron las siete tablas contra el respaldo autorizado. Supabase permanece como autenticación. La configuración operativa está en [render-neon.md](render-neon.md); la guía de servidor Linux de este documento queda como alternativa.
 
@@ -10,7 +10,7 @@ El 2026-09-08 se verificó el arranque de las imágenes Docker de web y API sin 
 
 La verificación completa del 2026-09-07 terminó con formato, lint, tipos y **155 pruebas aprobadas**: 48 de API, 19 de web, 8 de móvil, 2 del monitor y 78 de integración. También pasaron el simulacro de recuperación y las compilaciones. La auditoría de dependencias de producción no reportó vulnerabilidades conocidas después de las correcciones.
 
-La candidata reúne las funciones de v1. Las pruebas locales comprueban web/API/móvil, precisión monetaria, reintentos, autorización por usuario y recuperación. El registro previo del propietario acredita el recorrido básico de la web; no se da por probado el instalador móvil ni el correo de producción.
+La versión 1.0.0 reúne las funciones de v1. Las pruebas locales comprueban web/API/móvil, precisión monetaria, reintentos, autorización por usuario y recuperación. El recorrido autenticado de la web y los servicios publicados en Render fueron comprobados; la distribución en tiendas y el correo de producción siguen como etapas posteriores.
 
 | Control                                                       | Estado                                                                 |
 | ------------------------------------------------------------- | ---------------------------------------------------------------------- |
@@ -27,7 +27,7 @@ La candidata reúne las funciones de v1. Las pruebas locales comprueban web/API/
 | Rol limitado en producción                                    | Aplicado en Neon y usado por la API de Render                          |
 | Privacidad, términos, soporte y eliminación de cuenta         | Implementado en web y enlazado desde web y móvil                       |
 
-No cambiar a `1.0.0` estable ni crear una etiqueta estable mientras los controles externos permanezcan pendientes. El número visible de Expo es `1.0.0`, reservado para el futuro binario; los paquetes del repositorio se identifican como `1.0.0-rc.1`.
+La versión estable se identifica como `1.0.0` en los paquetes del repositorio, Expo y la etiqueta de GitHub. Los controles externos pendientes no bloquean la publicación web y deben completarse antes de distribuir la aplicación en tiendas.
 
 ## Verificación reproducible
 
@@ -134,6 +134,6 @@ exportados no son un APK/IPA ni validan enlaces o firma.
 
 ## Cierre y reversión
 
-Conservar esta candidata en Git. Tras completar los controles externos, actualizar versión/documentación, ejecutar la verificación completa y etiquetar el commit exacto como `v1.0.0`. Para revertir un despliegue, volver a las imágenes del commit anterior; no borrar tablas ni ejecutar migraciones inversas de forma automática. Si una migración rompe compatibilidad, detener escrituras y preparar un plan de recuperación verificado antes de cambiar de base.
+Conservar la etiqueta `v1.0.0` como referencia de esta publicación. Para revertir un despliegue, volver a las imágenes del commit anterior; no borrar tablas ni ejecutar migraciones inversas de forma automática. Si una migración rompe compatibilidad, detener escrituras y preparar un plan de recuperación verificado antes de cambiar de base.
 
 Referencias: [pg_dump e instantáneas](https://www.postgresql.org/docs/17/app-pgdump.html), [perfiles EAS](https://docs.expo.dev/build/eas-json/), [APK de prueba](https://docs.expo.dev/build-reference/apk/), [proxy Caddy](https://caddyserver.com/docs/caddyfile/directives/reverse_proxy).

@@ -1,6 +1,6 @@
 # Registro de cambios
 
-## 1.0.0-rc.1 — 2026-09-07
+## 1.0.0 — 2026-09-09
 
 - Candidata que integra web, API y móvil, con cuentas, movimientos, transferencias, presupuestos, metas y exportaciones.
 - Reintentos del móvil conservan cuerpo y clave hasta confirmar el resultado; evitan envíos simultáneos y bloquean cambios durante una operación pendiente. El estado se conserva mientras la pantalla permanece abierta.
