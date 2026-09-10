@@ -31,3 +31,6 @@ apps/api/.agents/
 apps/api/.claude/
 apps/api/.windsurf/
 apps/api/skills-lock.json
+branch_structure.json
+temp_auto_push.bat
+temp_interactive_push.bat
