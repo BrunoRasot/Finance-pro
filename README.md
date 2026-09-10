@@ -1,99 +1,87 @@
-# Finance Pro
+# FinancePro
 
-Aplicación de finanzas personales para web y móvil.
+Sistema de gestión financiera personal multiplataforma, desarrollado en TypeScript y organizado como un monorepo. Centraliza cuentas, movimientos, transferencias, presupuestos y metas de ahorro mediante una API compartida por los clientes web y móvil.
 
-## Estado actual
+## Arquitectura del sistema
 
-Despliegue activo desde el 2026-09-08: **Render para web/API y Neon para PostgreSQL**, en planes gratuitos. Supabase se conserva para autenticación. La web está en <https://finance-pro-web-o6ce.onrender.com> y la API en <https://finance-pro-api-wyv2.onrender.com/api/v1>. Ver [configuración y operación](docs/render-neon.md).
+El backend implementa un **monolito modular con NestJS**, estructurado por dominios funcionales. Cada módulo separa presentación HTTP, casos de uso, reglas de dominio y persistencia. La inyección de dependencias conecta los servicios de aplicación con los repositorios mediante contratos explícitos.
 
-Versión oficial **1.0.0**, publicada en web mediante Render. La aplicación Android se distribuye actualmente mediante una compilación interna de Expo; la publicación en tiendas queda como una etapa posterior. La operación del sistema está documentada en la [guía de lanzamiento](docs/release-v1.md).
+La aplicación web utiliza **Next.js App Router**, con consultas financieras y acciones autenticadas ejecutadas desde el servidor. El cliente móvil utiliza **React Native y Expo**, consume la misma API y comparte las reglas de autorización y consistencia del backend. Ambos clientes acceden a los datos financieros a través de NestJS.
 
-El backend en `apps/api` incluye NestJS, PostgreSQL con Prisma, verificación JWT de Supabase, cuentas, ingresos/gastos, transferencias atómicas, presupuestos mensuales, metas de ahorro con aportes, exportación de datos, historial filtrable y saldo calculado con aislamiento por usuario. La web en `apps/web` incluye Next.js y las vistas privadas de gestión. La aplicación Expo en `apps/mobile` comparte autenticación, API y datos para ofrecer resumen, administración de cuentas y movimientos, transferencias, presupuestos, metas, exportaciones y temas claro/oscuro en Android e iOS. Ver [contrato de movimientos](docs/transactions-api.md), [transferencias](docs/transfers-api.md), [presupuestos](docs/budgets-api.md), [metas de ahorro](docs/goals-api.md), [exportaciones](docs/exports-api.md) y [guía móvil](apps/mobile/README.md).
+La persistencia se implementa con **PostgreSQL y Prisma ORM**, incluyendo migraciones versionadas, relaciones entre entidades, restricciones de integridad y transacciones de base de datos.
 
-## Stack
+## Tecnologías utilizadas
 
-- Web: Next.js y TypeScript.
-- Móvil: React Native, Expo y TypeScript.
-- API: NestJS y TypeScript.
-- Datos: PostgreSQL y Prisma.
-- Autenticación: Supabase Auth.
-- Gestión del monorepo: pnpm workspaces.
+| Capa                        | Tecnologías                                                       | Responsabilidad                                                                               |
+| --------------------------- | ----------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| Lenguaje y runtime          | TypeScript, Node.js 24                                            | Tipado estático y ejecución del backend y del servidor web                                    |
+| Frontend web                | Next.js 16, React 19, App Router                                  | Renderizado del servidor, navegación y acciones de gestión financiera                         |
+| Aplicación móvil            | React Native, Expo, Expo Router                                   | Interfaz multiplataforma y navegación para Android e iOS                                      |
+| Backend                     | NestJS 11, Express 5                                              | API HTTP, módulos de negocio e inyección de dependencias                                      |
+| Persistencia                | PostgreSQL, Prisma 7, pg                                          | Modelo relacional, consultas, migraciones y operaciones transaccionales                       |
+| Autenticación               | Supabase Auth, Supabase SSR, jose                                 | Gestión de sesiones, flujo PKCE y verificación de JWT                                         |
+| Validación y seguridad HTTP | Zod, class-validator, class-transformer, Helmet, NestJS Throttler | Validación de entradas, transformación de DTO, cabeceras de seguridad y límites de peticiones |
+| Infraestructura             | Render, Neon, Docker                                              | Alojamiento de web y API, PostgreSQL administrado y contenedores                              |
+| Calidad de código           | ESLint, Prettier, Jest, Supertest, Node.js Test Runner            | Análisis estático, formato y pruebas automatizadas                                            |
+| Gestión del repositorio     | pnpm workspaces, Git                                              | Administración del monorepo, dependencias y control de versiones                              |
 
-## Estructura
+## Módulos funcionales
+
+- **Cuentas:** administración de efectivo, cuentas bancarias y billeteras en PEN o USD; archivado reversible y cálculo de saldos.
+- **Movimientos:** ingresos y gastos categorizados, edición, eliminación e historial filtrable por fecha, tipo y categoría.
+- **Transferencias:** operaciones entre cuentas de la misma moneda con registro atómico de los movimientos de origen y destino.
+- **Reportes:** agregación mensual de ingresos y gastos, excluyendo transferencias internas para evitar su doble contabilización.
+- **Presupuestos:** límites por usuario, mes, moneda y categoría, con cálculo de consumo, disponibilidad y porcentaje utilizado.
+- **Metas de ahorro:** administración de objetivos y aportes, cálculo de progreso y conservación del historial mediante archivado.
+- **Exportaciones:** generación de respaldos de datos en JSON versionado y archivos CSV de movimientos.
+
+## Integridad y consistencia financiera
+
+Los importes se almacenan con precisión decimal mediante `Decimal(18,2)` y se serializan como cadenas en los contratos JSON. El saldo se deriva del saldo inicial y de los movimientos registrados mediante agregaciones SQL; los filtros del historial no alteran su cálculo.
+
+Las transferencias utilizan transacciones PostgreSQL y bloqueo de filas en un orden estable. El registro de la transferencia y sus dos movimientos se confirma como una única operación, evitando actualizaciones parciales.
+
+Las claves de idempotencia permiten reintentar operaciones de creación sin duplicar registros. Las restricciones únicas por propietario y las claves foráneas compuestas refuerzan la integridad de los datos y la asociación de cada movimiento con la cuenta de su usuario.
+
+Las operaciones conservan la moneda de cada cuenta. Las transferencias requieren monedas coincidentes y el sistema mantiene separados los importes en PEN y USD, sin conversión cambiaria automática.
+
+## Autenticación y autorización
+
+Supabase Auth administra la identidad y las sesiones. La API verifica JWT con firmas asimétricas ES256 o RS256 y obtiene la identidad del usuario desde el token validado. Los servicios y repositorios restringen el acceso a los recursos por propietario.
+
+La web integra Supabase SSR mediante PKCE y cookies HttpOnly, con renovación de sesión y verificación del usuario en páginas privadas y acciones. El servidor Next.js transmite el JWT al backend para las consultas financieras. El cliente móvil mantiene su sesión mediante adaptadores de almacenamiento específicos de plataforma y envía el token a la misma API.
+
+La capa HTTP incorpora validación de DTO, limitación de peticiones, cabeceras de seguridad, manejo centralizado de excepciones e identificadores de solicitud para trazabilidad.
+
+## Organización del código
 
 ```text
 finance-pro/
   apps/
-    web/        # Aplicación Next.js
-    mobile/     # Aplicación Expo para Android, iOS y web móvil
-    api/        # API NestJS
-  packages/     # Futuros paquetes compartidos
+    api/        # API NestJS y persistencia Prisma
+    web/        # Cliente web Next.js
+    mobile/     # Cliente React Native con Expo
+  docs/         # Arquitectura y contratos funcionales
+  scripts/      # Automatización y verificaciones
+  deploy/       # Infraestructura y respaldos
 ```
 
-## Herramientas
+Los módulos de negocio del backend se distribuyen en las capas `presentation`, `application`, `domain` e `infrastructure`. Los controladores gestionan el contrato HTTP, los servicios coordinan los casos de uso y los repositorios encapsulan el acceso a PostgreSQL.
 
-- Node.js 24.x.
-- pnpm 11.22.0, declarado en package.json.
-- Git.
-- Visual Studio Code.
-- Docker Desktop para PostgreSQL local.
+## Calidad y operación
 
-Para abrir el proyecto desde una terminal:
+El repositorio incluye comprobación de tipos, análisis estático y pruebas unitarias, HTTP y de integración con PostgreSQL. Las pruebas cubren reglas financieras, aislamiento entre usuarios, idempotencia y comportamiento transaccional. La validación de versiones incluye compilaciones web y móvil y un simulacro de recuperación de datos.
 
-```powershell
-cd C:\Users\bdbr2\finance-pro
-code .
-```
+La infraestructura documentada utiliza Render para la web y la API, Neon para PostgreSQL y Supabase para autenticación. Los endpoints de salud distinguen entre disponibilidad del proceso y preparación del servicio con conexión a la base de datos.
 
-## Iniciar con PostgreSQL local
+## Documentación técnica
 
-Desde la raíz del repositorio:
-
-```powershell
-pnpm install --frozen-lockfile
-pnpm db:setup
-pnpm db:up
-pnpm db:migrate
-pnpm dev:api
-```
-
-Docker Desktop debe estar activo. `db:setup` genera credenciales locales aleatorias sin mostrarlas y conserva valores existentes. Configurar `SUPABASE_URL` en `apps/api/.env` con la URL pública del proyecto (ver `.env.example`). Nunca copiar claves privadas. Sin Supabase configurado, las rutas privadas rechazan el acceso. El proyecto debe usar firmas ES256 o RS256.
-
-Consultar <http://127.0.0.1:3001/api/v1/health/live>: responde `{"status":"ok"}`. Detener con `Ctrl+C`. Si PowerShell bloquea scripts `.ps1`, usar `pnpm.cmd` en lugar de `pnpm`.
-
-<http://127.0.0.1:3001/api/v1/health/ready> comprueba además la conexión PostgreSQL. Ver [contrato de cuentas](docs/accounts-api.md) para las rutas privadas.
-
-## Comandos desde la raíz
-
-Si el backend ya está configurado para Supabase, no se necesita Docker para ejecutar la aplicación. Desde la raíz, ejecutar `pnpm dev` para iniciar una única API y la web. Esa API también queda disponible para el teléfono en la red local. En otra terminal se puede ejecutar `pnpm dev:mobile`; no se debe iniciar además `pnpm dev:api:mobile`. La conexión requiere internet. Para configurar una instalación nueva con Supabase, consultar [la guía del backend](apps/api/README.md#supabase).
-
-Para iniciar la web, completar `apps/web/.env.local` siguiendo [la guía web](apps/web/README.md), mantener la API ejecutándose y abrir otra terminal con `pnpm dev:web`. Visitar `http://localhost:3000`.
-
-| Comando                 | Función                                      |
-| ----------------------- | -------------------------------------------- |
-| `pnpm dev`              | API compartida y web durante desarrollo      |
-| `pnpm dev:api`          | Solo la API con recarga durante desarrollo   |
-| `pnpm dev:web`          | Solo la web con recarga durante desarrollo   |
-| `pnpm dev:mobile`       | Expo con código QR para Android y iOS        |
-| `pnpm dev:api:mobile`   | API temporalmente accesible en la red local  |
-| `pnpm build`            | Compilar API y web                           |
-| `pnpm start:web`        | Ejecutar la web compilada                    |
-| `pnpm start:api`        | Ejecutar el backend compilado                |
-| `pnpm typecheck`        | Revisar tipos, incluidas las pruebas         |
-| `pnpm lint`             | Análisis estático sin modificar archivos     |
-| `pnpm test`             | Pruebas de configuración e integración HTTP  |
-| `pnpm format:check`     | Revisar formato                              |
-| `pnpm format`           | Aplicar formato                              |
-| `pnpm db:up`            | Iniciar PostgreSQL local                     |
-| `pnpm db:stop`          | Detener PostgreSQL conservando datos         |
-| `pnpm db:generate`      | Generar el cliente Prisma                    |
-| `pnpm db:migrate`       | Aplicar migraciones pendientes               |
-| `pnpm test:integration` | Probar cuentas con PostgreSQL y JWT firmados |
-
-Ver [guía del backend](apps/api/README.md), [guía de la web](apps/web/README.md), [decisiones de arquitectura](docs/architecture.md) y [registro de cambios](CHANGELOG.md).
-
-El flujo de GitHub Actions ejecutará formato, lint, tipos, pruebas y compilación al publicar el repositorio en GitHub. No despliega la aplicación.
-
-## Próxima etapa
-
-La versión 1.0.0 incluye registro, acceso, cuentas, ingresos, gastos, historial, saldo, resumen mensual, transferencias, presupuestos, metas, exportación y aplicación móvil. `pnpm verify:release` ejecuta formato, lint, tipos, pruebas, simulacro de recuperación y compilaciones; requiere una base PostgreSQL de pruebas migrada, Node 24, pnpm 11 y herramientas PostgreSQL 17. La operación y validación se realizan siguiendo [release-v1.md](docs/release-v1.md). Nunca versionar credenciales, respaldos ni archivos `.env` reales.
+- [Decisiones de arquitectura](docs/architecture.md)
+- [Contrato de cuentas](docs/accounts-api.md)
+- [Contrato de movimientos](docs/transactions-api.md)
+- [Transferencias](docs/transfers-api.md)
+- [Reportes](docs/reports-api.md)
+- [Presupuestos](docs/budgets-api.md)
+- [Metas de ahorro](docs/goals-api.md)
+- [Exportaciones](docs/exports-api.md)
+- [Registro de cambios](CHANGELOG.md)
